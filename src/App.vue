@@ -1,35 +1,185 @@
 <script setup>
-import { onMounted } from 'vue'
-import { useEventsStore } from './stores/events'
+import { onMounted, ref } from 'vue'
+import { useEventsStore } from '@/stores/events'
 import { RouterView } from 'vue-router'
-import Balance from './components/Balance.vue'
-import BlockNumber from './components/BlockNumber.vue'
-import AppNav from './components/AppNav.vue'
+import Balance from '@/components/Balance.vue'
+import BlockNumber from '@/components/BlockNumber.vue'
+import AppNav from '@/components/AppNav.vue'
+import ContractEventAlerts from '@/components/ContractEventAlerts.vue'
 import { initDrawers } from 'flowbite'
 
+const alerts = ref([])
+const id = ref(0)
 const eventsStore = useEventsStore()
+
+function addAlert(type, event, state) {
+  alerts.value.push({
+    id: event + '123456' + (1234567890 + ++id.value),
+    type,
+    event,
+    blockNumber: 123456,
+    requestId: 1234567890 + ++id.value,
+    state
+  })
+}
+
+function addSlotAlert(type, event, state) {
+  alerts.value.push({
+    id: event + '123456' + (1234567890 + ++id.value),
+    type,
+    event,
+    blockNumber: 123456,
+    requestId: 1234567890 + ++id.value,
+    slotIdx: 1,
+    state
+  })
+}
 
 onMounted(async () => {
   initDrawers()
   await eventsStore.fetchPastEvents()
 
   function onStorageRequested(blockNumber, requestId, request, state) {
-    alert('storage requested')
+    alerts.value.push({
+      type: 'info',
+      event: 'StorageRequested',
+      blockNumber,
+      requestId,
+      state
+    })
   }
-  await eventsStore.listenForNewEvents(onStorageRequested)
+  function onRequestFulfilled(blockNumber, requestId) {
+    alerts.value.push({
+      type: 'success',
+      event: 'RequestStarted',
+      blockNumber,
+      requestId,
+      state: 'Fulfilled'
+    })
+  }
+  function onRequestCancelled(blockNumber, requestId) {
+    alerts.value.push({
+      type: 'danger',
+      event: 'RequestCancelled',
+      blockNumber,
+      requestId,
+      state: 'Cancelled'
+    })
+  }
+  function onRequestFailed(blockNumber, requestId) {
+    alerts.value.push({
+      type: 'danger',
+      event: 'RequestFailed',
+      blockNumber,
+      requestId,
+      state: 'Failed'
+    })
+  }
+  function onRequestFinished(blockNumber, requestId) {
+    alerts.value.push({
+      type: 'info',
+      event: 'RequestFinished',
+      blockNumber,
+      requestId,
+      state: 'Finished'
+    })
+  }
+  function onSlotFreed(blockNumber, requestId, slotIdx) {
+    alerts.value.push({
+      type: 'warning',
+      event: 'SlotFreed',
+      blockNumber,
+      requestId,
+      slotIdx,
+      state: 'Freed'
+    })
+  }
+  function onSlotFilled(blockNumber, requestId, slotIdx) {
+    alerts.value.push({
+      type: 'info',
+      event: 'SlotFilled',
+      blockNumber,
+      requestId,
+      slotIdx,
+      state: 'Filled'
+    })
+  }
+  await eventsStore.listenForNewEvents(
+    onStorageRequested,
+    onRequestFulfilled,
+    onRequestCancelled,
+    onRequestFailed,
+    onRequestFinished,
+    onSlotFreed,
+    onSlotFilled
+  )
 })
 </script>
 
 <template>
-  <header>
-    <AppNav />
-  </header>
-  <RouterView class="max-w-screen-xl mx-auto" />
-  <footer>
-    <Balance />
-    <BlockNumber />
-  </footer>
+  <button
+    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    type="button"
+    @click="addAlert('success', 'RequestFulfilled', 'Fulfilled')"
+  >
+    success alert
+  </button>
+  <button
+    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    type="button"
+    @click="addAlert('warning', 'SlotFreed', 'Freed')"
+  >
+    warning alert
+  </button>
+  <button
+    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    type="button"
+    @click="addAlert('danger', 'RequestFailed', 'Failed')"
+  >
+    danger alert
+  </button>
+  <button
+    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    type="button"
+    @click="addAlert('info', 'RequestFinished', 'Finished')"
+  >
+    info alert
+  </button>
+  <button
+    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    type="button"
+    @click="addSlotAlert('info', 'SlotFreed', 'Freed')"
+  >
+    info alert - Slot
+  </button>
+  <div class="flex flex-col h-screen min-w-96">
+    <header class="w-full text-center border-b p-4">
+      <AppNav />
+    </header>
+    <main>
+      <div class="mx-auto max-w-screen-xl">
+        <ContractEventAlerts v-model="alerts"></ContractEventAlerts>
+        <RouterView class="flex-auto p-4" />
+      </div>
+    </main>
+    <footer class="w-full text-center border-t p-4 mt-4">
+      <Balance />
+      <BlockNumber />
+    </footer>
+  </div>
 </template>
+
+<style scoped>
+header,
+footer,
+main {
+  @apply min-w-96;
+}
+header,
+footer {
+  @apply bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-600;
+}
+</style>
 
 <!-- <style scoped>
 header {

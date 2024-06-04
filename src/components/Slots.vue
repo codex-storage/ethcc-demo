@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import { initModals } from 'flowbite'
-import { useEventsStore } from '../stores/events'
+import { useEventsStore } from '@/stores/events'
 import { storeToRefs } from 'pinia'
 
 const eventsStore = useEventsStore()
@@ -20,7 +20,7 @@ const eventsStore = useEventsStore()
 //   let state = requestState[stateIdx]
 //   var imgSrc = ""
 //   var error = ""
-//   if (state == "New" || state == "Started"){
+//   if (state == "New" || state == "Fulfilled"){
 //     try {
 //       let res = await codexApi.download(cid)
 //       try{
@@ -116,7 +116,7 @@ const { requests } = storeToRefs(eventsStore)
       <div>CID: {{ request[2][0] }}</div>
       <div>RequestID: {{ requestId }}</div>
       <div>State: {{ state }}</div>
-      <CodexImage v-if="state == 'New' || state == 'Started'" cid="cid" />
+      <CodexImage v-if="state == 'New' || state == 'Fulfilled'" cid="cid" />
       <!-- <div v-if="error">{{error}}</div>
       <img v-else-if="imgSrc" :src="imgSrc" width="100%"/> -->
     </li>

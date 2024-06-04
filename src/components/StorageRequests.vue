@@ -1,9 +1,9 @@
 <script setup>
 import { inject, ref, onMounted, computed } from 'vue'
 import { initModals } from 'flowbite'
-import { useEventsStore } from '../stores/events'
+import { useEventsStore } from '@/stores/events'
 import { storeToRefs } from 'pinia'
-import CodexImage from './CodexImage.vue'
+import CodexImage from '@/components/CodexImage.vue'
 import { shortHex } from '@/utils/ids'
 
 const eventsStore = useEventsStore()
@@ -12,7 +12,7 @@ const { requests } = storeToRefs(eventsStore)
 function getStateColour(state) {
   if (state === 'New') {
     return 'bg-yellow-200'
-  } else if (state === 'Started') {
+  } else if (state === 'Fulfilled') {
     return 'bg-green-500'
   } else {
     return 'bg-red-500'
@@ -21,19 +21,9 @@ function getStateColour(state) {
 </script>
 
 <template>
-  <!-- <ul class="requests">
-    <li v-for="([requestId, { request, state }], idx) in requests" :key="{ requestId }">
-      {{ idx }}.
-      <div>CID: {{ request[2][0] }}</div>
-      <div>RequestID: {{ requestId }}</div>
-      <div>State: {{ state }}</div>
-      <CodexImage v-if="state == 'New' || state == 'Started'" cid="request[2][0]" />
-    </li>
-  </ul> -->
-
-  <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+  <div>
     <div
-      class="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 py-4 bg-white dark:bg-gray-900"
+      class="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 py-4 px-6 bg-white dark:bg-gray-900"
     >
       <div>
         <button
@@ -129,59 +119,61 @@ function getStateColour(state) {
         />
       </div>
     </div>
-    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-        <tr>
-          <th scope="col" class="px-6 py-3">RequestID</th>
-          <th scope="col" class="px-6 py-3">CID</th>
-          <th scope="col" class="px-6 py-3">State</th>
-          <th scope="col" class="px-6 py-3">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="([requestId, { request, state }], idx) in requests"
-          :key="{ requestId }"
-          class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600"
-        >
-          <th
-            scope="row"
-            class="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+    <div class="relative overflow-x-auto overflow-y-auto max-h-screen shadow-md sm:rounded-lg">
+      <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="px-6 py-3">RequestID</th>
+            <th scope="col" class="px-6 py-3">CID</th>
+            <th scope="col" class="px-6 py-3">State</th>
+            <th scope="col" class="px-6 py-3">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="([requestId, { request, state }], idx) in requests"
+            :key="{ requestId }"
+            class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600"
           >
-            <CodexImage
-              :local-only="!['New', 'Started'].includes(state)"
-              :cid="request[2][0]"
-              class="w-10 h-10 rounded-full mt-1"
-            />
-            <!-- class="w-10 h-10 rounded-full"
-              src="/docs/images/people/profile-picture-4.jpg"
-              alt="Jese image"
-            /> -->
-            <div class="ps-3">
-              <div class="text-base font-semibold">{{ shortHex(requestId) }}</div>
-              <div class="font-normal text-gray-500">leslie@flowbite.com</div>
-            </div>
-          </th>
-          <td class="px-6 py-4">{{ shortHex(request[2][0]) }}</td>
-          <td class="px-6 py-4">
-            <div class="flex items-center">
-              <div :class="`h-2.5 w-2.5 rounded-full ${getStateColour(state)} me-2`"></div>
-              {{ state }}
-            </div>
-          </td>
-          <td class="px-6 py-4">
-            <!-- Modal toggle -->
-            <a
-              href="#"
-              type="button"
-              data-modal-show="editUserModal"
-              class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-              >Edit user</a
+            <th
+              scope="row"
+              class="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
             >
-          </td>
-        </tr>
-      </tbody>
-    </table>
+              <CodexImage
+                :local-only="!['New', 'Fulfilled'].includes(state)"
+                :cid="request[2][0]"
+                class="w-10 h-10 rounded-full mt-1"
+              />
+              <!-- class="w-10 h-10 rounded-full"
+                  src="/docs/images/people/profile-picture-4.jpg"
+                  alt="Jese image"
+                /> -->
+              <div class="ps-3">
+                <div class="text-base font-semibold">{{ shortHex(requestId) }}</div>
+                <div class="font-normal text-gray-500">leslie@flowbite.com</div>
+              </div>
+            </th>
+            <td class="px-6 py-4">{{ shortHex(request[2][0]) }}</td>
+            <td class="px-6 py-4">
+              <div class="flex items-center">
+                <div :class="`h-2.5 w-2.5 rounded-full ${getStateColour(state)} me-2`"></div>
+                {{ state }}
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <!-- Modal toggle -->
+              <a
+                href="#"
+                type="button"
+                data-modal-show="editUserModal"
+                class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                >Edit user</a
+              >
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <!-- Edit user modal -->
     <div
       id="editUserModal"
@@ -194,7 +186,7 @@ function getStateColour(state) {
         <form class="relative bg-white rounded-lg shadow dark:bg-gray-700">
           <!-- Modal header -->
           <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Edit user</h3>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Details</h3>
             <button
               type="button"
               class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"

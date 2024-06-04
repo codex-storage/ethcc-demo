@@ -1,7 +1,7 @@
 <script setup>
 import { inject, ref, onMounted } from 'vue'
 import { initModals } from 'flowbite'
-import SpinnerLoading from './SpinnerLoading.vue'
+import SpinnerLoading from '@/components/SpinnerLoading.vue'
 
 const codexApi = inject('codexApi')
 const loading = ref(false)
@@ -25,21 +25,6 @@ const props = defineProps({
   },
   alt: String
 })
-//   var imgSrc = ""
-//   var error = ""
-//   if (state == "New" || state == "Started"){
-//     try {
-//       let res = await codexApi.download(cid)
-//       try{
-//         const blob = await res.blob()
-//         imgSrc = URL.createObjectURL(blob)
-//       } catch (e) {
-//         error = `not an image (error: ${error.message})`
-//       }
-//     } catch(error) {
-//       error = `failed to download cid data: ${error}`
-//     }
-//   }
 
 onMounted(async () => {
   loading.value = true
@@ -69,11 +54,7 @@ onMounted(async () => {
 <template>
   <div class="text-center">
     <SpinnerLoading v-if="loading" />
-    <div
-      v-else-if="error"
-      v-bind="$attrs"
-      class="dark:bg-orange-700 dark:text-orange-200"
-    >
+    <div v-else-if="error" v-bind="$attrs" class="dark:bg-orange-700 dark:text-orange-200">
       <svg
         class="text-red-500 fill-red-100 dark:text-white"
         aria-hidden="true"

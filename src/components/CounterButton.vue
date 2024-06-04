@@ -1,5 +1,5 @@
 <script setup>
-import {useCounterStore} from '../stores/counter'
+import { useCounterStore } from '@/stores/counter'
 import { ref, onMounted } from 'vue'
 
 useCounterStore()

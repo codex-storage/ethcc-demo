@@ -29,3 +29,5 @@ coverage
 
 *.tsbuildinfo
 *.key
+codex-setup
+codex-data

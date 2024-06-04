@@ -1,10 +1,9 @@
 <script setup>
-import Slots from '../components/Slots.vue'
+import Slots from '@/components/Slots.vue'
 </script>
 
 <template>
-  <main>
-    <Slots/>
-  </main>
+  <div>
+    <Slots />
+  </div>
 </template>
-
