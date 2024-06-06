@@ -152,7 +152,7 @@ onMounted(async () => {
   >
     info alert - Slot
   </button>
-  <div class="flex flex-col h-screen min-w-96">
+  <div class="flex flex-col h-full min-w-96 bg-white dark:bg-gray-900">
     <header class="w-full text-center border-b p-4">
       <AppNav />
     </header>
@@ -173,11 +173,11 @@ onMounted(async () => {
 header,
 footer,
 main {
-  @apply min-w-96;
+  @apply min-w-96 bg-white dark:bg-gray-900;
 }
 header,
 footer {
-  @apply bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-600;
+  @apply border-gray-200 dark:border-gray-600 dark:text-white;
 }
 </style>
 
