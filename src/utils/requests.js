@@ -28,3 +28,23 @@ export function price(request) {
   }
   return request.ask.reward * request.ask.duration * request.ask.slots
 }
+
+export function getStateColour(state) {
+  if (state === 'New') {
+    return 'yellow'
+  } else if (state === 'Fulfilled') {
+    return 'green'
+  } else if (state === 'Finished') {
+    return 'gray'
+  } else {
+    return 'red'
+  }
+}
+
+export const requestState = [
+  'New', // [default] waiting to fill slots
+  'Fulfilled', // all slots filled, accepting regular proofs
+  'Cancelled', // not enough slots filled before expiry
+  'Finished', // successfully completed
+  'Failed' // too many nodes have failed to provide proofs, data lost
+]

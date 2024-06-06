@@ -5,21 +5,13 @@ import { useRouter } from 'vue-router'
 import { useRequestsStore } from '@/stores/requests'
 import { storeToRefs } from 'pinia'
 import CodexImage from '@/components/CodexImage.vue'
+import StateIndicator from '@/components/StateIndicator.vue'
 import { shortHex } from '@/utils/ids'
+import { getStateColour } from '@/utils/requests'
 
 const requestsStore = useRequestsStore()
 const { requests } = storeToRefs(requestsStore)
 const router = useRouter()
-
-function getStateColour(state) {
-  if (state === 'New') {
-    return 'bg-yellow-200'
-  } else if (state === 'Fulfilled') {
-    return 'bg-green-500'
-  } else {
-    return 'bg-red-500'
-  }
-}
 </script>
 
 <template>
@@ -159,8 +151,7 @@ function getStateColour(state) {
             <td class="px-6 py-4">{{ shortHex(content.cid) }}</td>
             <td class="px-6 py-4">
               <div class="flex items-center">
-                <div :class="`h-2.5 w-2.5 rounded-full ${getStateColour(state)} me-2`"></div>
-                {{ state }}
+                <StateIndicator :text="state" :color="getStateColour(state)"></StateIndicator>
               </div>
             </td>
             <td class="px-6 py-4">

@@ -1,7 +1,8 @@
-import { ref, computed, inject } from 'vue'
+import { ref, inject } from 'vue'
 import { defineStore } from 'pinia'
 import { slotId } from '../utils/ids'
-import { arrayToObject } from '@/utils/requests'
+import { arrayToObject, requestState } from '@/utils/requests'
+import { slotState } from '@/utils/slots'
 
 export const useRequestsStore = defineStore('request', () => {
   // let fetched = false
@@ -50,36 +51,31 @@ export const useRequestsStore = defineStore('request', () => {
   // onSlotFreed => update slots[slotId].state with getSlotState
   //             => add to slotFreedEvents {blockNumber, slotId, slotIdx}
   //             => add blockNumber to blockNumbers
-  const requestState = [
-    'New', // [default] waiting to fill slots
-    'Fulfilled', // all slots filled, accepting regular proofs
-    'Cancelled', // not enough slots filled before expiry
-    'Finished', // successfully completed
-    'Failed' // too many nodes have failed to provide proofs, data lost
-  ]
 
   const getRequestState = async (requestId) => {
     let stateIdx = await marketplace.requestState(requestId)
     return requestState[stateIdx]
   }
 
+  const getSlotState = async (slotId) => {
+    let stateIdx = await marketplace.slotState(slotId)
+    return slotState[stateIdx]
+  }
+
   const getSlots = async (requestId, numSlots) => {
-    // storageRequestedEvents.value.push({ blockNumber, requestId })
     let slots = []
-    for (let i = 0; i < numSlots; i++) {
-      let id = slotId(requestId, i)
-      let state = await marketplace.slotState(id)
-      slots.push({ slotId: id, slotIdx: i, state })
+    for (let slotIdx = 0; slotIdx < numSlots; slotIdx++) {
+      let id = slotId(requestId, slotIdx)
+      let state = await getSlotState(id)
+      let proofsMissed = await marketplace.missingProofs(id)
+      let provider = await marketplace.getHost(id)
+      slots.push({ slotId: id, slotIdx, state, proofsMissed, provider })
     }
     return slots
     // blockNumbers.value.add(blockNumber)
   }
 
   async function fetch() {
-    // if (fetched) {
-    //   // allow multiple calls without re-fetching
-    //   return
-    // }
     // query past events
     loading.value = true
     try {

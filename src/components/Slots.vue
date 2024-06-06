@@ -1,124 +1,52 @@
 <script setup>
 import { onMounted } from 'vue'
-import { initModals } from 'flowbite'
-import { useRequestsStore } from '@/stores/requests'
-import { storeToRefs } from 'pinia'
-
-const requestsStore = useRequestsStore()
-
-// const ethProvider = inject('ethProvider')
-// const marketplace = inject('marketplace')
-// const codexApi = inject('codexApi')
-// const token = inject('token')
-// const blockNumber = ref(0)
-// const requests = ref([])
-
-// const onStorageRequested = async ({requestId, ask, expiry, blockNumber}) => {
-//   let request = await marketplace.getRequest(requestId)
-//   let stateIdx = await marketplace.requestState(requestId)
-//   let cid = request[2][0]
-//   let state = requestState[stateIdx]
-//   var imgSrc = ""
-//   var error = ""
-//   if (state == "New" || state == "Fulfilled"){
-//     try {
-//       let res = await codexApi.download(cid)
-//       try{
-//         const blob = await res.blob()
-//         imgSrc = URL.createObjectURL(blob)
-//       } catch (e) {
-//         error = `not an image (error: ${error.message})`
-//       }
-//     } catch(error) {
-//       error = `failed to download cid data: ${error}`
-//     }
-//   }
-//   requests.value.push({
-//     blockNumber,
-//     cid,
-//     requestId,
-//     ask,
-//     expiry,
-//     state,
-//     imgSrc,
-//     error
-//   })
-// }
-// onMounted(async () => {
-//   await requestsStore.fetch()
-//   await requestsStore.listenForNewEvents()
-// })
-//   let storageRequestedFilter = marketplace.filters.StorageRequested
-//   marketplace.on(storageRequestedFilter, async (requestId, ask, expiry, event) => {
-//     let {blockNumber} = event
-//     // onStorageRequested({
-//     //   blockNumber,
-//     //   requestId,
-//     //   ask,
-//     //   expiry,
-//     // })
-//     let request = await marketplace.getRequest(requestId)
-//     let state = await getRequestState(requestId)
-//     onStorageRequested(blockNumber, request, state)
-//   })
-
-//   // query past events
-//   let requests = (await marketplace.queryFilter(storageRequestedFilter))
-//   requests.forEach(async (event) => {
-//     let {requestId, ask, expiry} = event.args
-//     let {blockNumber} = event
-//     // onStorageRequested({
-//       //   blockNumber,
-//       //   requestId,
-//       //   ask,
-//       //   expiry
-//       // })
-//     let request = await marketplace.getRequest(requestId)
-//     let state = await getRequestState(requestId)
-//     onStorageRequested(blockNumber, request, state)
-//   })
-
-//   let slotFreedFilter = marketplace.filters.SlotFreed
-//   marketplace.on(slotFreedFilter, (requestId, ask, expiry, event) => {
-//     let {blockNumber} = event
-//     onSlotFreed({
-//       blockNumber,
-//       requestId,
-//       ask,
-//       expiry,
-//     })
-//   })
-
-//   let slotsFreed = (await marketplace.queryFilter(slotFreedFilter))
-//   slotsFreed.forEach(event => {
-//     let {requestId, ask, expiry} = event.args
-//     let {blockNumber} = event
-//     onSlotFreed({
-//       blockNumber,
-//       requestId,
-//       ask,
-//       expiry
-//     })
-//   })
-
-// })
-// console.log(await ethProvider.getBlockNumber())
-const { requests } = storeToRefs(requestsStore)
+import { getStateColour } from '@/utils/slots'
+import { shortHex } from '@/utils/ids'
+import StateIndicator from '@/components/StateIndicator.vue'
+defineProps({
+  slots: {
+    type: Array,
+    required: true
+  }
+})
 </script>
 
 <template>
-  <!-- <span>asdf{{ blockNumber.value }}</span> -->
-  <!-- <span>Yo yo yo yo yo {{ blockNumber }}</span> -->
-  <ul class="requests">
-    <!-- <li v-for="(request, idx) in requestsStore.requests" :key="{requestId}"> WORKS! -->
-    <li v-for="([requestId, { request, state }], idx) in requests" :key="{ requestId }">
-      {{ idx }}.
-      <div>CID: {{ request[2][0] }}</div>
-      <div>RequestID: {{ requestId }}</div>
-      <div>State: {{ state }}</div>
-      <CodexImage v-if="state == 'New' || state == 'Fulfilled'" cid="cid" />
-      <!-- <div v-if="error">{{error}}</div>
-      <img v-else-if="imgSrc" :src="imgSrc" width="100%"/> -->
-    </li>
-  </ul>
+  <div
+    class="relative overflow-x-auto overflow-y-auto max-h-screen shadow-md sm:rounded-lg border-t border-gray-50"
+  >
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+          <th scope="col" class="px-6 py-3">SlotID</th>
+          <th scope="col" class="px-6 py-3">Index</th>
+          <th scope="col" class="px-6 py-3">Proofs Missed</th>
+          <th scope="col" class="px-6 py-3">Provider</th>
+          <th scope="col" class="px-6 py-3">State</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="({ slotId, slotIdx, state, proofsMissed, provider }, idx) in slots"
+          :key="{ slotId }"
+          class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600"
+        >
+          <th
+            scope="row"
+            class="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+          >
+            <div class="text-base font-semibold">{{ shortHex(slotId) }}</div>
+          </th>
+          <td class="px-6 py-4">{{ slotIdx }}</td>
+          <td class="px-6 py-4">{{ proofsMissed }}</td>
+          <td class="px-6 py-4">{{ shortHex(provider) }}</td>
+          <td class="px-6 py-4">
+            <div class="flex items-center">
+              <StateIndicator :text="state" :color="getStateColour(state)"></StateIndicator>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>

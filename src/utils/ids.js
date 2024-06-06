@@ -33,14 +33,14 @@ export function short(long, ellipses = '*', start = 3, stop = 6) {
   return short
 }
 
-export function shortHex(long) {
+export function shortHex(long, chars = 4) {
   let shortened = ''
   let rest = long
   if (long.substring(0, 2) === '0x') {
     shortened = '0x'
     rest = long.substring(2)
   }
-  shortened += short(rest, '..', 4, 4)
+  shortened += short(rest, '..', chars, chars)
   return shortened
 }
 

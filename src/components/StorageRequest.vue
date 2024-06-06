@@ -1,9 +1,11 @@
 <script setup>
 import { computed } from 'vue'
-import { price } from '@/utils/requests'
+import { getStateColour, price } from '@/utils/requests'
 
 import CodexImage from '@/components/CodexImage.vue'
+import StateIndicator from '@/components/StateIndicator.vue'
 import { shortHex } from '@/utils/ids'
+import Slots from './Slots.vue'
 
 const props = defineProps({
   requestId: {
@@ -21,77 +23,107 @@ const totalPrice = computed(() => price(props.request))
 
 <template>
   <div class="flex">
-    <CodexImage class="flex-2" :cid="props.request.content.cid"></CodexImage>
+    <CodexImage class="flex-2" :cid="request.content.cid"></CodexImage>
     <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
       <h2 class="mb-2 text-xl font-semibold leading-none text-gray-900 md:text-2xl dark:text-white">
-        {{ shortHex(requestId) }}
+        {{ shortHex(requestId, 12) }}
       </h2>
       <p class="mb-4 text-xl font-extrabold leading-none text-gray-900 md:text-2xl dark:text-white">
         {{ totalPrice }} CDX
       </p>
+      <StateIndicator
+        class="mb-4"
+        :text="request.state"
+        :color="getStateColour(request.state)"
+      ></StateIndicator>
       <dl>
         <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Dataset CID</dt>
         <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
           {{ request.content.cid }}
         </dd>
       </dl>
-      <dl class="flex items-center space-x-6">
-        <div>
-          <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Expiry</dt>
-          <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
-            {{ request.expiry }}s
-          </dd>
-        </div>
-        <div>
-          <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Duration</dt>
-          <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
-            {{ request.ask.duration }}s
-          </dd>
-        </div>
+      <dl>
+        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Client</dt>
+        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
+          {{ request.client }}
+        </dd>
       </dl>
-      <div class="flex items-center space-x-4">
-        <button
-          type="button"
-          class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+      <dl>
+        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Merkle root</dt>
+        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
+          {{ request.content.merkleRoot }}
+        </dd>
+      </dl>
+      <div class="relative overflow-x-auto overflow-y-auto max-h-screen mb-10">
+        <table
+          class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 mx-auto"
         >
-          <svg
-            aria-hidden="true"
-            class="mr-1 -ml-1 w-5 h-5"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"
-            ></path>
-            <path
-              fill-rule="evenodd"
-              d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-              clip-rule="evenodd"
-            ></path>
-          </svg>
-          Edit
-        </button>
-        <button
-          type="button"
-          class="inline-flex items-center text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900"
-        >
-          <svg
-            aria-hidden="true"
-            class="w-5 h-5 mr-1.5 -ml-1"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-              clip-rule="evenodd"
-            ></path>
-          </svg>
-          Delete
-        </button>
+          <tbody>
+            <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
+              <td
+                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+              >
+                Expiry
+              </td>
+              <td class="px-6 py-2 font-light">{{ request.expiry }} seconds</td>
+            </tr>
+            <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
+              <td
+                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+              >
+                Duration
+              </td>
+              <td class="px-6 py-2 font-light">{{ request.ask.duration }} seconds</td>
+            </tr>
+            <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
+              <td
+                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+              >
+                Slot size
+              </td>
+              <td class="px-6 py-2 font-light">{{ request.ask.slotSize }} bytes</td>
+            </tr>
+            <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
+              <td
+                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+              >
+                Proof probability
+              </td>
+              <td class="px-6 py-2 font-light">{{ request.ask.proofProbability }}</td>
+            </tr>
+            <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
+              <td
+                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+              >
+                Reward
+              </td>
+              <td class="px-6 py-2 font-light">{{ request.ask.reward }} CDX</td>
+            </tr>
+            <tr
+              class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:tbg-gray-600 text-base"
+            >
+              <td
+                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+              >
+                Collateral
+              </td>
+              <td class="px-6 py-2 font-light">{{ request.ask.collateral }} CDX</td>
+            </tr>
+            <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
+              <td
+                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+              >
+                Max slot loss
+              </td>
+              <td class="px-6 py-2 font-light">
+                {{ request.ask.maxSlotLoss }} {{ request.ask.maxSlotLoss == 1 ? 'slot' : 'slots' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
+      <Slots :slots="request.slots"></Slots>
     </div>
   </div>
 </template>
