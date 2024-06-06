@@ -1,10 +1,10 @@
 <script setup>
 import { onMounted } from 'vue'
 import { initModals } from 'flowbite'
-import { useEventsStore } from '@/stores/events'
+import { useRequestsStore } from '@/stores/requests'
 import { storeToRefs } from 'pinia'
 
-const eventsStore = useEventsStore()
+const requestsStore = useRequestsStore()
 
 // const ethProvider = inject('ethProvider')
 // const marketplace = inject('marketplace')
@@ -45,8 +45,8 @@ const eventsStore = useEventsStore()
 //   })
 // }
 // onMounted(async () => {
-//   await eventsStore.fetchPastEvents()
-//   await eventsStore.listenForNewEvents()
+//   await requestsStore.fetch()
+//   await requestsStore.listenForNewEvents()
 // })
 //   let storageRequestedFilter = marketplace.filters.StorageRequested
 //   marketplace.on(storageRequestedFilter, async (requestId, ask, expiry, event) => {
@@ -103,14 +103,14 @@ const eventsStore = useEventsStore()
 
 // })
 // console.log(await ethProvider.getBlockNumber())
-const { requests } = storeToRefs(eventsStore)
+const { requests } = storeToRefs(requestsStore)
 </script>
 
 <template>
   <!-- <span>asdf{{ blockNumber.value }}</span> -->
   <!-- <span>Yo yo yo yo yo {{ blockNumber }}</span> -->
   <ul class="requests">
-    <!-- <li v-for="(request, idx) in eventsStore.requests" :key="{requestId}"> WORKS! -->
+    <!-- <li v-for="(request, idx) in requestsStore.requests" :key="{requestId}"> WORKS! -->
     <li v-for="([requestId, { request, state }], idx) in requests" :key="{ requestId }">
       {{ idx }}.
       <div>CID: {{ request[2][0] }}</div>

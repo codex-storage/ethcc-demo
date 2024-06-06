@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { useEventsStore } from '@/stores/events'
+import { onBeforeMount, onMounted, ref } from 'vue'
+import { useRequestsStore } from '@/stores/requests'
 import { RouterView } from 'vue-router'
 import Balance from '@/components/Balance.vue'
 import BlockNumber from '@/components/BlockNumber.vue'
@@ -10,7 +10,7 @@ import { initDrawers } from 'flowbite'
 
 const alerts = ref([])
 const id = ref(0)
-const eventsStore = useEventsStore()
+const requestsStore = useRequestsStore()
 
 function addAlert(type, event, state) {
   alerts.value.push({
@@ -35,9 +35,11 @@ function addSlotAlert(type, event, state) {
   })
 }
 
+onBeforeMount(async () => {})
+
 onMounted(async () => {
+  await requestsStore.fetch()
   initDrawers()
-  await eventsStore.fetchPastEvents()
 
   function onStorageRequested(blockNumber, requestId, request, state) {
     alerts.value.push({
@@ -104,7 +106,7 @@ onMounted(async () => {
       state: 'Filled'
     })
   }
-  await eventsStore.listenForNewEvents(
+  await requestsStore.listenForNewEvents(
     onStorageRequested,
     onRequestFulfilled,
     onRequestCancelled,

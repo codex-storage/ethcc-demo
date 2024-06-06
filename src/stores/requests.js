@@ -1,8 +1,10 @@
 import { ref, computed, inject } from 'vue'
 import { defineStore } from 'pinia'
 import { slotId } from '../utils/ids'
+import { arrayToObject } from '@/utils/requests'
 
-export const useEventsStore = defineStore('events', () => {
+export const useRequestsStore = defineStore('request', () => {
+  // let fetched = false
   const marketplace = inject('marketplace')
   const ethProvider = inject('ethProvider')
   let {
@@ -24,6 +26,8 @@ export const useEventsStore = defineStore('events', () => {
   // const requestFailedEvents = ref([]) // {blockNumber, requestId}
   // const requestFinishedEvents = ref([]) // {blockNumber, requestId}
   const loading = ref(false)
+  const fetched = ref(false)
+  // const request = computed(() => count.value * 2)
 
   // onStorageRequested => add request to requests ref, along with slots
   //                    => add to storageRequestedEvents {blockNumber, requestId}
@@ -59,10 +63,8 @@ export const useEventsStore = defineStore('events', () => {
     return requestState[stateIdx]
   }
 
-  const getSlots = async (requestId, request) => {
+  const getSlots = async (requestId, numSlots) => {
     // storageRequestedEvents.value.push({ blockNumber, requestId })
-    let ask = request[1]
-    let numSlots = ask[0]
     let slots = []
     for (let i = 0; i < numSlots; i++) {
       let id = slotId(requestId, i)
@@ -73,7 +75,11 @@ export const useEventsStore = defineStore('events', () => {
     // blockNumbers.value.add(blockNumber)
   }
 
-  async function fetchPastEvents() {
+  async function fetch() {
+    // if (fetched) {
+    //   // allow multiple calls without re-fetching
+    //   return
+    // }
     // query past events
     loading.value = true
     try {
@@ -81,11 +87,12 @@ export const useEventsStore = defineStore('events', () => {
       pastRequests.forEach(async (event) => {
         let { requestId, ask, expiry } = event.args
         // let { blockNumber } = event
-        let request = await marketplace.getRequest(requestId)
+        let arrRequest = await marketplace.getRequest(requestId)
+        let request = arrayToObject(arrRequest)
         let state = await getRequestState(requestId)
-        let slots = getSlots(requestId, request)
+        let slots = await getSlots(requestId, request.ask.slots)
         requests.value.set(requestId, {
-          request,
+          ...request,
           state,
           slots,
           requestFinishedId: null
@@ -95,6 +102,7 @@ export const useEventsStore = defineStore('events', () => {
       console.error(`failed to load past contract events: ${error.message}`)
     } finally {
       loading.value = false
+      fetched.value = true
     }
   }
 
@@ -217,7 +225,6 @@ export const useEventsStore = defineStore('events', () => {
   // function increment() {
   //   count.value++
   // }
-
   return {
     requests,
     // slots,
@@ -229,8 +236,9 @@ export const useEventsStore = defineStore('events', () => {
     // requestCancelledEvents,
     // requestFailedEvents,
     // requestFinishedEvents,
-    fetchPastEvents,
+    fetch,
     listenForNewEvents,
-    loading
+    loading,
+    fetched
   }
 })

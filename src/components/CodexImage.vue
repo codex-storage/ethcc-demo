@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref, onMounted } from 'vue'
+import { inject, ref, onMounted, computed } from 'vue'
 import { initModals } from 'flowbite'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 
@@ -13,10 +13,8 @@ defineOptions({
 })
 
 const props = defineProps({
-  // Required string
   cid: {
-    type: String,
-    required: true
+    type: [String, undefined]
   },
   localOnly: {
     // only try downloading from the local node
@@ -25,8 +23,12 @@ const props = defineProps({
   },
   alt: String
 })
+const hidden = computed(() => props.cid === undefined)
 
 onMounted(async () => {
+  if (hidden.value) {
+    return
+  }
   loading.value = true
 
   try {
@@ -52,7 +54,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="text-center">
+  <div v-if="!hidden" class="text-center">
     <SpinnerLoading v-if="loading" />
     <div v-else-if="error" v-bind="$attrs" class="dark:bg-orange-700 dark:text-orange-200">
       <svg
