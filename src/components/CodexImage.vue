@@ -1,16 +1,11 @@
 <script setup>
 import { inject, ref, onMounted, computed } from 'vue'
-import { initModals } from 'flowbite'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 
 const codexApi = inject('codexApi')
 const loading = ref(false)
 const imgSrc = ref('')
 const error = ref('')
-
-defineOptions({
-  inheritAttrs: false
-})
 
 const props = defineProps({
   cid: {
@@ -71,6 +66,6 @@ onMounted(async () => {
       <span class="sr-only">{{ error }}</span>
     </div>
 
-    <img v-bind="$attrs" v-else-if="imgSrc" :src="imgSrc" class="rounded-full" :alt="props.alt" />
+    <img v-else-if="imgSrc" :src="imgSrc" class="rounded-full" :alt="props.alt" />
   </div>
 </template>

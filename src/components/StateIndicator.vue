@@ -13,6 +13,15 @@ const props = defineProps({
   text: {
     type: String,
     required: true
+  },
+  size: {
+    type: String,
+    default() {
+      return 'sm'
+    },
+    validator(value, props) {
+      return ['sm', 'lg'].includes(value)
+    }
   }
 })
 
@@ -59,14 +68,35 @@ const theme = computed(() => {
     }
   }
 })
+
+const size = computed(() => {
+  if (props.size === 'sm') {
+    return {
+      fontSize: 'text-xs',
+      bubbleWidth: 'w-2',
+      bubbleHeight: 'h-2',
+      bubbleMargin: 'me-1'
+    }
+  } else {
+    return {
+      fontSize: 'text-md',
+      bubbleWidth: 'w-3',
+      bubbleHeight: 'h-3',
+      bubbleMargin: 'me-2'
+    }
+  }
+})
 </script>
 
 <template>
   <span
-    class="inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full"
-    :class="[theme.bg, theme.text, theme.bgDark, theme.textDark]"
+    class="inline-flex items-center font-medium px-2.5 py-0.5 rounded-full"
+    :class="[theme.bg, theme.text, theme.bgDark, theme.textDark, size.fontSize]"
   >
-    <span class="w-2 h-2 me-1 rounded-full" :class="theme.bgDot"></span>
+    <span
+      class="w-2 h-2 me-1 rounded-full"
+      :class="[theme.bgDot, size.bubbleWidth, size.bubbleHeight, size.bubbleMargin]"
+    ></span>
     {{ text }}
   </span>
 </template>

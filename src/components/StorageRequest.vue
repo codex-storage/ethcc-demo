@@ -22,16 +22,19 @@ const totalPrice = computed(() => price(props.request))
 </script>
 
 <template>
-  <div class="flex">
-    <CodexImage class="flex-2" :cid="request.content.cid"></CodexImage>
-    <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
+  <div class="flex flex-wrap">
+    <CodexImage class="flex-initial mx-auto my-8 lg:my-16 min-w-sm max-w-md w-full
+    rounded" :cid="request.content.cid" :local-only="!['New',
+    'Fulfilled'].includes(request.state)"></CodexImage>
+    <div class="py-8 px-4 ml-4 max-w-2xl lg:py-16 flex-1">
       <div class="flex justify-between items-center mb-2">
         <h2 class="text-xl font-semibold leading-none text-gray-900 md:text-2xl dark:text-white">
-          Request {{ shortHex(requestId, 12) }}
+          Request {{ shortHex(requestId, 8) }}
         </h2>
         <StateIndicator
           :text="request.state"
           :color="getStateColour(request.state)"
+          size="lg"
         ></StateIndicator>
       </div>
       <p class="mb-4 text-xl font-extrabold leading-none text-gray-900
