@@ -15,9 +15,9 @@ const router = useRouter()
 </script>
 
 <template>
-  <div>
+  <div class="flex flex-1 flex-col h-auto">
     <div
-      class="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 py-4 px-6 bg-white dark:bg-gray-900"
+      class="flex flex-initial items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 py-4 px-6 bg-white dark:bg-gray-900"
     >
       <div>
         <button
@@ -114,9 +114,11 @@ const router = useRouter()
       </div>
     </div>
     <div
-      class="relative overflow-x-auto overflow-y-auto max-h-screen shadow-md sm:rounded-lg border-t border-gray-50"
+      class="max-h-128 flex-1 overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg border-t border-gray-50"
     >
-      <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+      <table
+        class="w-full relative text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      >
         <thead
           class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
         >
@@ -169,3 +171,9 @@ const router = useRouter()
     </div>
   </div>
 </template>
+
+<style scoped>
+.max-h-128 {
+  max-height: 36rem;
+}
+</style>

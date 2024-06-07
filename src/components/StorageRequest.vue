@@ -25,17 +25,20 @@ const totalPrice = computed(() => price(props.request))
   <div class="flex">
     <CodexImage class="flex-2" :cid="request.content.cid"></CodexImage>
     <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
-      <h2 class="mb-2 text-xl font-semibold leading-none text-gray-900 md:text-2xl dark:text-white">
-        {{ shortHex(requestId, 12) }}
-      </h2>
-      <p class="mb-4 text-xl font-extrabold leading-none text-gray-900 md:text-2xl dark:text-white">
-        {{ totalPrice }} CDX
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-xl font-semibold leading-none text-gray-900 md:text-2xl dark:text-white">
+          Request {{ shortHex(requestId, 12) }}
+        </h2>
+        <StateIndicator
+          :text="request.state"
+          :color="getStateColour(request.state)"
+        ></StateIndicator>
+      </div>
+      <p class="mb-4 text-xl font-extrabold leading-none text-gray-900
+      md:text-2xl dark:text-white flex justify-between">
+        <div>{{ totalPrice }} CDX</div>
+
       </p>
-      <StateIndicator
-        class="mb-4"
-        :text="request.state"
-        :color="getStateColour(request.state)"
-      ></StateIndicator>
       <dl>
         <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Dataset CID</dt>
         <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">

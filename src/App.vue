@@ -155,16 +155,14 @@ onMounted(async () => {
     info alert - Slot
   </button>
   <div class="flex flex-col h-full min-w-96 bg-white dark:bg-gray-900">
-    <header class="w-full text-center border-b p-4">
+    <header class="w-full text-center border-b p-4 flex-none">
       <AppNav />
     </header>
-    <main>
-      <div class="mx-auto max-w-screen-xl">
-        <ContractEventAlerts v-model="alerts"></ContractEventAlerts>
-        <RouterView class="flex-auto p-4" />
-      </div>
+    <main class="flex-1 mx-auto max-w-screen-xl w-full p-4">
+      <ContractEventAlerts v-model="alerts"></ContractEventAlerts>
+      <RouterView />
     </main>
-    <footer class="w-full text-center border-t p-4 mt-4">
+    <footer class="w-full text-center border-t p-4 mt-4 flex-none">
       <Balance />
       <BlockNumber />
     </footer>
