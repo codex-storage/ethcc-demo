@@ -18,7 +18,7 @@ function addAlert(type, event, state) {
     type,
     event,
     blockNumber: 123456,
-    requestId: 1234567890 + ++id.value,
+    requestId: '0x1a93c8ea68a45dadc599f38858b3fdcb3c442aea0f6180c20e3f08614c251041',
     state
   })
 }
@@ -29,7 +29,7 @@ function addSlotAlert(type, event, state) {
     type,
     event,
     blockNumber: 123456,
-    requestId: 1234567890 + ++id.value,
+    requestId: '0x0d08d8fa3df9d79f1c57a34ebc6a8050ae91fca2c0d6f7191470cbbf38a048bd',
     slotIdx: 1,
     state
   })

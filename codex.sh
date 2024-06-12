@@ -12,6 +12,7 @@ ${CODEX_PATH}/build/codex \
   --log-level='INFO;TRACE:marketplace,node,statemachine,erasure' \
   --api-port=8080 \
   --api-bindaddr=0.0.0.0 \
+  --api-cors-origin='*' \
   --metrics=true \
   --listen-addrs=/ip4/0.0.0.0/tcp/8070 \
   --disc-port=8090 \

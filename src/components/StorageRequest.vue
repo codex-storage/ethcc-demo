@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { getStateColour, price } from '@/utils/requests'
+import { autoPluralize } from '@/utils/strings'
 
 import CodexImage from '@/components/CodexImage.vue'
 import StateIndicator from '@/components/StateIndicator.vue'
@@ -19,6 +20,9 @@ const props = defineProps({
 })
 
 const totalPrice = computed(() => price(props.request))
+const maxSlotLoss = computed(() => autoPluralize(props.request.ask.maxSlotLoss, 'slot'))
+const slots = computed(() => autoPluralize(props.request.ask.slots, 'slot'))
+const stateColour = computed(() => getStateColour(props.request.state))
 </script>
 
 <template>
@@ -33,7 +37,7 @@ const totalPrice = computed(() => price(props.request))
         </h2>
         <StateIndicator
           :text="request.state"
-          :color="getStateColour(request.state)"
+          :color="stateColour"
           size="lg"
         ></StateIndicator>
       </div>
@@ -115,6 +119,16 @@ const totalPrice = computed(() => price(props.request))
               </td>
               <td class="px-6 py-2 font-light">{{ request.ask.collateral }} CDX</td>
             </tr>
+            <tr
+              class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:tbg-gray-600 text-base"
+            >
+              <td
+                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+              >
+                Slots
+              </td>
+              <td class="px-6 py-2 font-light">{{ slots }}</td>
+            </tr>
             <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
                 class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
@@ -122,7 +136,7 @@ const totalPrice = computed(() => price(props.request))
                 Max slot loss
               </td>
               <td class="px-6 py-2 font-light">
-                {{ request.ask.maxSlotLoss }} {{ request.ask.maxSlotLoss == 1 ? 'slot' : 'slots' }}
+                {{ maxSlotLoss }}
               </td>
             </tr>
           </tbody>

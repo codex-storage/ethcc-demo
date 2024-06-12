@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { initDismisses } from 'flowbite'
+import { RouterLink } from 'vue-router'
 
 const props = defineProps({
   id: {
@@ -26,7 +27,7 @@ const props = defineProps({
     default: 'View more'
   },
   btnMoreUrl: {
-    type: URL,
+    type: String,
     required: true
   }
 })
@@ -174,8 +175,8 @@ onMounted(() => {
       <slot></slot>
     </div>
     <div class="flex">
-      <a
-        href="{{ btnMoreUrl }}"
+      <RouterLink
+        :to="btnMoreUrl"
         class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-3 py-1.5 me-2 text-center inline-flex items-center"
         :class="theme.btnMore"
       >
@@ -191,7 +192,7 @@ onMounted(() => {
           />
         </svg>
         {{ btnMoreText }}
-      </a>
+      </RouterLink>
       <button
         type="button"
         class="bg-transparent border hover:text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-3 py-1.5 text-center dark:hover:text-white"

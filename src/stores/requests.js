@@ -152,12 +152,17 @@ export const useRequestsStore = defineStore('request', () => {
     onSlotFilled
   ) {
     marketplace.on(StorageRequested, async (requestId, ask, expiry, event) => {
-      let { blockNumber } = event
-      let request = await marketplace.getRequest(requestId)
+      let { blockNumber } = event.log
+      let arrRequest = await marketplace.getRequest(requestId)
+      let request = arrayToObject(arrRequest)
       let state = await getRequestState(requestId)
-      let slots = getSlots(requestId, request)
-
-      requests.value.set(requestId, { request, state, slots, requestFinishedId: null })
+      let slots = await getSlots(requestId, request.ask.slots)
+      requests.value.set(requestId, {
+        ...request,
+        state,
+        slots,
+        requestFinishedId: null
+      })
 
       // callback
       if (onStorageRequested) {
@@ -176,7 +181,7 @@ export const useRequestsStore = defineStore('request', () => {
       updateRequestState(requestId, 'Fulfilled')
       updateRequestFinishedId(requestId, requestFinishedId)
 
-      let { blockNumber } = event
+      let { blockNumber } = event.log
       if (onRequestFulfilled) {
         onRequestFulfilled(blockNumber, requestId)
       }
@@ -184,7 +189,7 @@ export const useRequestsStore = defineStore('request', () => {
     marketplace.on(RequestCancelled, async (requestId, event) => {
       updateRequestState(requestId, 'Cancelled')
 
-      let { blockNumber } = event
+      let { blockNumber } = event.log
       if (onRequestCancelled) {
         onRequestCancelled(blockNumber, requestId)
       }
@@ -193,7 +198,7 @@ export const useRequestsStore = defineStore('request', () => {
       updateRequestState(requestId, 'Failed')
       cancelWaitForRequestFinished(requestId)
 
-      let { blockNumber } = event
+      let { blockNumber } = event.log
       if (onRequestFailed) {
         onRequestFailed(blockNumber, requestId)
       }
@@ -201,7 +206,7 @@ export const useRequestsStore = defineStore('request', () => {
     marketplace.on(SlotFreed, async (requestId, slotIdx, event) => {
       updateRequestSlotState(requestId, slotIdx, 'Freed')
 
-      let { blockNumber } = event
+      let { blockNumber } = event.log
       if (onSlotFreed) {
         onSlotFreed(blockNumber, requestId, slotIdx)
       }
@@ -209,7 +214,7 @@ export const useRequestsStore = defineStore('request', () => {
     marketplace.on(SlotFilled, async (requestId, slotIdx, event) => {
       updateRequestSlotState(requestId, slotIdx, 'Filled')
 
-      let { blockNumber } = event
+      let { blockNumber } = event.log
       if (onSlotFilled) {
         onSlotFilled(blockNumber, requestId, slotIdx)
       }
