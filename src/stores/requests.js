@@ -27,7 +27,7 @@ export const useRequestsStore = defineStore('request', () => {
   // const requestFailedEvents = ref([]) // {blockNumber, requestId}
   // const requestFinishedEvents = ref([]) // {blockNumber, requestId}
   const loading = ref(false)
-  const fetched = ref(false)
+  const blocks = ref(new Map())
   // const request = computed(() => count.value * 2)
 
   // onStorageRequested => add request to requests ref, along with slots
@@ -75,30 +75,58 @@ export const useRequestsStore = defineStore('request', () => {
     // blockNumbers.value.add(blockNumber)
   }
 
+  const getBlock = async (blockHash) => {
+    if (blocks.value.has(blockHash)) {
+      return blocks.value.get(blockHash)
+    } else {
+      let block = await ethProvider.getBlock(blockHash)
+      blocks.value.set(blockHash, block)
+      return block
+    }
+  }
+
   async function fetch() {
     // query past events
     loading.value = true
     try {
-      let pastRequests = await marketplace.queryFilter(StorageRequested)
-      pastRequests.forEach(async (event) => {
+      let events = await marketplace.queryFilter(StorageRequested)
+      console.log('got ', events.length, ' StorageRequested events')
+      let reqs = new Map()
+      events.forEach(async (event, i) => {
+        console.log('getting details for StorageRequested event ', i)
+        let start = Date.now()
+        // let event = events[i]
+        // await events.forEach(async (event) => {
         let { requestId, ask, expiry } = event.args
-        // let { blockNumber } = event
+        let { blockHash, blockNumber } = event
         let arrRequest = await marketplace.getRequest(requestId)
         let request = arrayToObject(arrRequest)
         let state = await getRequestState(requestId)
         let slots = await getSlots(requestId, request.ask.slots)
+        let block = await getBlock(blockHash)
+        // populate temp map to constrain state update volume
+        // reqs.set(requestId, {
+        //   ...request,
+        //   state,
+        //   slots: [],
+        //   requestedAt: block.timestamp,
+        //   requestFinishedId: null
+        // })
         requests.value.set(requestId, {
           ...request,
           state,
           slots,
+          requestedAt: block.timestamp,
           requestFinishedId: null
         })
+        console.log(`got details for ${i} in ${(Date.now() - start) / 1000} seconds`)
+        if (i === events.length - 1) {
+          loading.value = false
+        }
       })
+      // reqs.forEach((request, requestId) => requests.value.set(requestId, request))
     } catch (error) {
       console.error(`failed to load past contract events: ${error.message}`)
-    } finally {
-      loading.value = false
-      fetched.value = true
     }
   }
 
@@ -152,15 +180,17 @@ export const useRequestsStore = defineStore('request', () => {
     onSlotFilled
   ) {
     marketplace.on(StorageRequested, async (requestId, ask, expiry, event) => {
-      let { blockNumber } = event.log
+      let { blockNumber, blockHash } = event.log
       let arrRequest = await marketplace.getRequest(requestId)
       let request = arrayToObject(arrRequest)
       let state = await getRequestState(requestId)
       let slots = await getSlots(requestId, request.ask.slots)
+      let block = await getBlock(blockHash)
       requests.value.set(requestId, {
         ...request,
         state,
         slots,
+        requestedAt: block.timestamp,
         requestFinishedId: null
       })
 
@@ -239,7 +269,6 @@ export const useRequestsStore = defineStore('request', () => {
     // requestFinishedEvents,
     fetch,
     listenForNewEvents,
-    loading,
-    fetched
+    loading
   }
 })

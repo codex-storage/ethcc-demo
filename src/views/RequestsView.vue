@@ -6,9 +6,9 @@ import SkeletonLoading from '@/components/SkeletonLoading.vue'
 import { computed } from 'vue'
 
 const requestsStore = useRequestsStore()
-const { loading, fetched, requests } = storeToRefs(requestsStore)
+const { loading, requests } = storeToRefs(requestsStore)
 const isLoading = computed(
-  () => loading.value || !fetched.value || !requests.value || requests.value?.size === 0
+  () => loading.value || !requests.value
 )
 </script>
 

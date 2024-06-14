@@ -5,7 +5,8 @@ import { autoPluralize } from '@/utils/strings'
 
 import CodexImage from '@/components/CodexImage.vue'
 import StateIndicator from '@/components/StateIndicator.vue'
-import { shortHex } from '@/utils/ids'
+import RelativeTime from '@/components/RelativeTime.vue'
+import ShortenValue from '@/components/ShortenValue.vue'
 import Slots from './Slots.vue'
 
 const props = defineProps({
@@ -27,25 +28,29 @@ const stateColour = computed(() => getStateColour(props.request.state))
 
 <template>
   <div class="flex flex-wrap">
-    <CodexImage class="flex-initial mx-auto my-8 lg:my-16 min-w-sm max-w-md w-full
-    rounded" :cid="request.content.cid" :local-only="!['New',
-    'Fulfilled'].includes(request.state)"></CodexImage>
+    <CodexImage
+      class="flex-initial mx-auto my-8 lg:my-16 min-w-sm max-w-md w-full rounded"
+      :cid="request.content.cid"
+      :local-only="!['New', 'Fulfilled'].includes(request.state)"
+    ></CodexImage>
     <div class="py-8 px-4 ml-4 max-w-2xl lg:py-16 flex-1">
       <div class="flex justify-between items-center mb-2">
         <h2 class="text-xl font-semibold leading-none text-gray-900 md:text-2xl dark:text-white">
-          Request {{ shortHex(requestId, 8) }}
+          Request <ShortenValue :value="requestId" :chars="8"></ShortenValue>
         </h2>
-        <StateIndicator
-          :text="request.state"
-          :color="stateColour"
-          size="lg"
-        ></StateIndicator>
+        <StateIndicator :text="request.state" :color="stateColour" size="lg"></StateIndicator>
       </div>
-      <p class="mb-4 text-xl font-extrabold leading-none text-gray-900
-      md:text-2xl dark:text-white flex justify-between">
-        <div>{{ totalPrice }} CDX</div>
-
+      <p
+        class="mb-4 text-xl font-extrabold leading-none text-gray-900 md:text-2xl dark:text-white flex justify-between"
+      >
+        {{ totalPrice }} CDX
       </p>
+      <dl>
+        <!-- <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Dataset CID</dt> -->
+        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
+          <RelativeTime :timestamp="new Date(request.requestedAt * 1000)"></RelativeTime>
+        </dd>
+      </dl>
       <dl>
         <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Dataset CID</dt>
         <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
@@ -69,7 +74,9 @@ const stateColour = computed(() => getStateColour(props.request.state))
           class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 mx-auto"
         >
           <tbody>
-            <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
+            <tr
+              class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base"
+            >
               <td
                 class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
@@ -77,7 +84,9 @@ const stateColour = computed(() => getStateColour(props.request.state))
               </td>
               <td class="px-6 py-2 font-light">{{ request.expiry }} seconds</td>
             </tr>
-            <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
+            <tr
+              class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base"
+            >
               <td
                 class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
@@ -85,7 +94,9 @@ const stateColour = computed(() => getStateColour(props.request.state))
               </td>
               <td class="px-6 py-2 font-light">{{ request.ask.duration }} seconds</td>
             </tr>
-            <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
+            <tr
+              class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base"
+            >
               <td
                 class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
@@ -93,7 +104,9 @@ const stateColour = computed(() => getStateColour(props.request.state))
               </td>
               <td class="px-6 py-2 font-light">{{ request.ask.slotSize }} bytes</td>
             </tr>
-            <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
+            <tr
+              class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base"
+            >
               <td
                 class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
@@ -101,7 +114,9 @@ const stateColour = computed(() => getStateColour(props.request.state))
               </td>
               <td class="px-6 py-2 font-light">{{ request.ask.proofProbability }}</td>
             </tr>
-            <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
+            <tr
+              class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base"
+            >
               <td
                 class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
@@ -129,7 +144,9 @@ const stateColour = computed(() => getStateColour(props.request.state))
               </td>
               <td class="px-6 py-2 font-light">{{ slots }}</td>
             </tr>
-            <tr class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
+            <tr
+              class="bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-600 text-base"
+            >
               <td
                 class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >

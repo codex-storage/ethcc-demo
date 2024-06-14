@@ -470,6 +470,11 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.0.tgz#a5417ae8427873f1dd08b70b3574b453e67b5f7f"
   integrity sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==
 
+"@feelinglovelynow/get-relative-time@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@feelinglovelynow/get-relative-time/-/get-relative-time-1.1.2.tgz#7c11a0345926918094c9745085f72fd591916338"
+  integrity sha512-3nnyH71EkAVH5sdxJpWWBjRTm5yXNtOQSPp1WtkKMd1//noO//tzdJShsDfCy9D1XQV0BbAPJ2btUstqtMT2mw==
+
 "@humanwhocodes/config-array@^0.11.14":
   version "0.11.14"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.11.14.tgz#d78e481a039f7566ecc9660b4ea7fe6b1fec442b"
@@ -2602,6 +2607,11 @@ vue-router@^4.3.0:
   integrity sha512-hKQJ1vDAZ5LVkKEnHhmm1f9pMiWIBNGF5AwU67PdH7TyXCj/a4hTccuUuYCAMgJK6rO/NVYtQIEN3yL8CECa7Q==
   dependencies:
     "@vue/devtools-api" "^6.5.1"
+
+vue-unique-id@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/vue-unique-id/-/vue-unique-id-3.2.1.tgz#e5db2e8620409a4b718578ca7f00eac78b15e818"
+  integrity sha512-Ih4vw3nx5O0M0q16Omx23T6VQW5U+RD16SEEbGa+aJWLJxFco8slQN6z6GUuzwgREgofH3ns9n7a97qr6DI73g==
 
 vue@^3.4.21:
   version "3.4.27"

@@ -11,11 +11,13 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@feelinglovelynow/get-relative-time": "^1.1.2",
     "ethers": "^6.12.1",
     "flowbite": "^2.3.0",
     "pinia": "^2.1.7",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "vue-unique-id": "^3.2.1"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",

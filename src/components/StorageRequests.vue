@@ -6,12 +6,20 @@ import { useRequestsStore } from '@/stores/requests'
 import { storeToRefs } from 'pinia'
 import CodexImage from '@/components/CodexImage.vue'
 import StateIndicator from '@/components/StateIndicator.vue'
-import { shortHex } from '@/utils/ids'
+import RelativeTime from '@/components/RelativeTime.vue'
+import ShortenValue from '@/components/ShortenValue.vue'
+import { shorten } from '@/utils/ids'
 import { getStateColour } from '@/utils/requests'
 
 const requestsStore = useRequestsStore()
 const { requests } = storeToRefs(requestsStore)
 const router = useRouter()
+const requestsOrdered = computed(() => {
+  const sorted = [...requests.value.entries()].sort(
+    ([reqIdA, reqA], [reqIdB, reqB]) => reqB.requestedAt - reqA.requestedAt
+  )
+  return sorted
+})
 </script>
 
 <template>
@@ -131,7 +139,7 @@ const router = useRouter()
         </thead>
         <tbody>
           <tr
-            v-for="([requestId, { content, state }], idx) in requests"
+            v-for="([requestId, { requestedAt, content, state }], idx) in requestsOrdered"
             :key="{ requestId }"
             class="cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600"
             @click="router.push(`/request/${requestId}`)"
@@ -146,11 +154,17 @@ const router = useRouter()
                 class="w-10 h-10 rounded-full mt-1"
               />
               <div class="ps-3">
-                <div class="text-base font-semibold">{{ shortHex(requestId) }}</div>
-                <div class="font-normal text-gray-500">leslie@flowbite.com</div>
+                <div class="text-base font-semibold">
+                  <ShortenValue :value="requestId"></ShortenValue>
+                </div>
+                <div class="font-normal text-gray-500">
+                  <RelativeTime :timestamp="new Date(requestedAt * 1000)"></RelativeTime>
+                </div>
               </div>
             </th>
-            <td class="px-6 py-4">{{ shortHex(content.cid) }}</td>
+            <td class="px-6 py-4">
+              <ShortenValue :value="content.cid"></ShortenValue>
+            </td>
             <td class="px-6 py-4">
               <div class="flex items-center">
                 <StateIndicator :text="state" :color="getStateColour(state)"></StateIndicator>

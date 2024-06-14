@@ -2,13 +2,14 @@
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import uniqueId from '@/plugins/UniqueIdPlugin'
 
-import App from './App.vue'
-import router from './router'
-import ethersPlugin from './plugins/EthersPlugin'
-import codexPlugin from './plugins/CodexPlugin'
-import marketplacePlugin from './plugins/MarketplacePlugin'
-import testTokenPlugin from './plugins/TestTokenPlugin'
+import App from '@/App.vue'
+import router from '@/router'
+import ethersPlugin from '@/plugins/EthersPlugin'
+import codexPlugin from '@/plugins/CodexPlugin'
+import marketplacePlugin from '@/plugins/MarketplacePlugin'
+import testTokenPlugin from '@/plugins/TestTokenPlugin'
 
 import './index.css'
 
@@ -1084,6 +1085,7 @@ app.use(marketplacePlugin, {
     }
   ],
   address: '0x4cBDfab37baB0AA3AC69A7b12C4396907dfF5227'
+  // address: '0x9C88D67c7C745D2F0A4E411c18A6a22c15b37EaA' // new address!
 })
 app.use(testTokenPlugin, {
   abi: [
@@ -1387,5 +1389,5 @@ app.use(codexPlugin, {
   codexRestUrl: 'http://localhost:8080/api/codex/v1',
   myAddress: '0xE3b2588a05260caC3EEAbfBFd7937BbC14eB0aC7'
 })
-
+app.use(uniqueId)
 app.mount('#app')

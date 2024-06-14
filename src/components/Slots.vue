@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted } from 'vue'
 import { getStateColour } from '@/utils/slots'
-import { shortHex } from '@/utils/ids'
+import { shorten } from '@/utils/ids'
 import StateIndicator from '@/components/StateIndicator.vue'
 defineProps({
   slots: {
@@ -35,11 +35,11 @@ defineProps({
             scope="row"
             class="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
           >
-            <div class="text-base font-semibold">{{ shortHex(slotId) }}</div>
+            <div class="text-base font-semibold">{{ shorten(slotId) }}</div>
           </th>
           <td class="px-6 py-4">{{ slotIdx }}</td>
           <td class="px-6 py-4">{{ proofsMissed }}</td>
-          <td class="px-6 py-4">{{ shortHex(provider) }}</td>
+          <td class="px-6 py-4">{{ shorten(provider) }}</td>
           <td class="px-6 py-4">
             <div class="flex items-center">
               <StateIndicator :text="state" :color="getStateColour(state)"></StateIndicator>
