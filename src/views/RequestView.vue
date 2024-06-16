@@ -7,11 +7,10 @@ import StorageRequest from '@/components/StorageRequest.vue'
 import SkeletonLoading from '@/components/SkeletonLoading.vue'
 
 const requestsStore = useRequestsStore()
-const { requests, loading, fetched } = storeToRefs(requestsStore)
+const { requests, loading } = storeToRefs(requestsStore)
 const route = useRoute()
 const isLoading = computed(
   () =>
-    !fetched.value ||
     loading.value ||
     !requests.value ||
     requests.value.size === 0 ||
