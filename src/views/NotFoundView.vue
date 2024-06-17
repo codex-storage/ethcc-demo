@@ -1,7 +1,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useRequestsStore } from '@/stores/requests'
-import StorageRequests from '@/components/StorageRequests.vue'
+import NotFound from '@/components/NotFound.vue'
 import SkeletonLoading from '@/components/SkeletonLoading.vue'
 import { computed } from 'vue'
 
@@ -13,6 +13,6 @@ const isLoading = computed(() => loading.value || !requests.value)
 <template>
   <div>
     <SkeletonLoading v-if="isLoading" type="text" />
-    <StorageRequests v-else />
+    <NotFound v-else></NotFound>
   </div>
 </template>

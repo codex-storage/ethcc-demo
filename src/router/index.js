@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import RequestsView from '../views/RequestsView.vue'
 import RequestView from '../views/RequestView.vue'
+import NotFoundView from '../views/NotFoundView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,6 +24,11 @@ const router = createRouter({
       name: 'request',
       component: RequestView,
       props: true // pass :requestId to props in RequestView
+    },
+    {
+      path: '/404',
+      name: 'NotFound',
+      component: NotFoundView
     }
   ]
 })

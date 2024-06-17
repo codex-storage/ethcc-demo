@@ -124,6 +124,9 @@ export const useRequestsStore = defineStore('request', () => {
           loading.value = false
         }
       })
+      if (events.length === 0) {
+        loading.value = false
+      }
       // reqs.forEach((request, requestId) => requests.value.set(requestId, request))
     } catch (error) {
       console.error(`failed to load past contract events: ${error.message}`)
