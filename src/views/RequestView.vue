@@ -10,32 +10,43 @@ const requestsStore = useRequestsStore()
 const { requests, loading } = storeToRefs(requestsStore)
 const route = useRoute()
 const router = useRouter()
-const isLoading = computed(() => loading.value)
-const requestId = ref(route.params.requestId)
-const request = ref(requests?.value?.get(requestId.value))
-const requestNotFound = computed(
-  () =>
-    !isLoading.value && requests.value !== undefined && !requests.value.get(route.params.requestId)
-)
-function getRequestFromStore(_) {
-  let req = requests?.value?.get(route.params.requestId)
-  if (requestNotFound.value) {
-    router.push({ name: 'NotFound' })
-  } else {
-    request.value = req
+const request = ref(undefined)
+
+async function fetch(requestId) {
+  try {
+    await requestsStore.fetchRequest(requestId)
+  } catch (error) {
+    if (error.message.includes('Unknown request')) {
+      router.push({ name: 'NotFound' })
+    }
   }
+  request.value = requests.value.get(requestId)
 }
-watch(() => route.params.requestId, getRequestFromStore)
-watch(() => isLoading.value, getRequestFromStore)
+
+const hasRequest = computed(() => {
+  return request.value !== undefined
+})
+
+watch(() => route.params.requestId, fetch)
+
+if (loading.value) {
+  watch(
+    () => loading.value,
+    (isLoading) => {
+      if (!isLoading) {
+        fetch(route.params.requestId)
+      }
+    },
+    { once: true }
+  )
+} else {
+  fetch(route.params.requestId)
+}
 </script>
 
 <template>
   <div>
-    <SkeletonLoading v-if="isLoading" type="image" />
-    <StorageRequest
-      v-else-if="!requestNotFound"
-      :requestId="route.params.requestId"
-      :request="request"
-    />
+    <SkeletonLoading v-if="loading" type="image" />
+    <StorageRequest v-else-if="hasRequest" :requestId="route.params.requestId" :request="request" />
   </div>
 </template>

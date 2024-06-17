@@ -1,19 +1,11 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { initTooltips } from 'flowbite'
-// defineProps({
-//   id: {
-//     type: String,
-//     required: true
-//   }
-// })
+import { onMounted } from 'vue'
 onMounted(() => {
-  initTooltips()
+
 })
 </script>
 
 <template>
-  <!-- <slot :id="$idRef('tooltip')" name="text"></slot> -->
   <p :data-tooltip-target="$id('tooltip')" class="cursor-help">
     <slot name="text"></slot>
   </p>

@@ -1,5 +1,6 @@
 <script setup>
-import { computed } from 'vue'
+import { onMounted, computed } from 'vue'
+import { initTooltips } from 'flowbite'
 import { getStateColour, price } from '@/utils/requests'
 import { autoPluralize } from '@/utils/strings'
 
@@ -20,6 +21,10 @@ const props = defineProps({
   }
 })
 
+onMounted(() => {
+  initTooltips()
+})
+
 const totalPrice = computed(() => price(props.request))
 const maxSlotLoss = computed(() => autoPluralize(props.request.ask.maxSlotLoss, 'slot'))
 const slots = computed(() => autoPluralize(props.request.ask.slots, 'slot'))
@@ -30,7 +35,7 @@ const stateColour = computed(() => getStateColour(props.request.state))
   <div class="flex flex-wrap">
     <CodexImage
       class="flex-initial mx-auto my-8 lg:my-16 min-w-sm max-w-md w-full rounded"
-      :cid="request.content.cid"
+      :cid="props.request.content.cid"
       :local-only="!['New', 'Fulfilled'].includes(request.state)"
     ></CodexImage>
     <div class="py-8 px-4 ml-4 max-w-2xl lg:py-16 flex-1">

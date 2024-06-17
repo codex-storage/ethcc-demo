@@ -17,8 +17,9 @@ defineProps({
 })
 </script>
 <template>
-  <Tooltip>
+  {{shorten(value, ellipses, chars)}}
+  <!-- <Tooltip>
     <template #text>{{ shorten(value, ellipses, chars) }}</template>
     <template #tooltip-content>{{ value }}</template>
-  </Tooltip>
+  </Tooltip> -->
 </template>

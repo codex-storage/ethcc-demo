@@ -1,12 +1,8 @@
 <script setup>
 import { onMounted } from 'vue'
-import { initDismisses } from 'flowbite'
 import AlertWithContent from '@/components/alerts/AlertWithContent.vue'
 
 const alerts = defineModel()
-onMounted(() => {
-  initDismisses()
-})
 </script>
 
 <template>

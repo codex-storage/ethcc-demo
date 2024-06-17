@@ -63,14 +63,20 @@ export const useRequestsStore = defineStore('request', () => {
   }
 
   const getSlots = async (requestId, numSlots) => {
+    console.log(`fetching ${numSlots} slots`)
+    let start = Date.now()
     let slots = []
     for (let slotIdx = 0; slotIdx < numSlots; slotIdx++) {
       let id = slotId(requestId, slotIdx)
+      const startSlotState = Date.now()
       let state = await getSlotState(id)
-      let proofsMissed = await marketplace.missingProofs(id)
+      console.log(`fetched slot state in ${(Date.now() - startSlotState) / 1000}s`)
+      const startGetHost = Date.now()
       let provider = await marketplace.getHost(id)
-      slots.push({ slotId: id, slotIdx, state, proofsMissed, provider })
+      console.log(`fetched slot provider in ${(Date.now() - startGetHost) / 1000}s`)
+      slots.push({ slotId: id, slotIdx, state, provider })
     }
+    console.log(`fetched ${numSlots} slots in ${(Date.now() - start) / 1000}s`)
     return slots
     // blockNumbers.value.add(blockNumber)
   }
@@ -85,40 +91,34 @@ export const useRequestsStore = defineStore('request', () => {
     }
   }
 
-  async function fetch() {
+  async function addRequest(requestId, blockHash) {
+    let state = await getRequestState(requestId)
+    let block = await getBlock(blockHash)
+    let reqExisting = requests.value.get(requestId) // just in case it already exists
+    let request = {
+      ...reqExisting,
+      state,
+      requestedAt: block.timestamp,
+      requestFinishedId: null,
+      detailsFetched: false
+    }
+    requests.value.set(requestId, request)
+    return request
+  }
+
+  async function fetchPastRequests() {
     // query past events
+    console.log('fetching past requests')
     loading.value = true
     try {
       let events = await marketplace.queryFilter(StorageRequested)
       console.log('got ', events.length, ' StorageRequested events')
-      let reqs = new Map()
       events.forEach(async (event, i) => {
         console.log('getting details for StorageRequested event ', i)
         let start = Date.now()
-        // let event = events[i]
-        // await events.forEach(async (event) => {
         let { requestId, ask, expiry } = event.args
         let { blockHash, blockNumber } = event
-        let arrRequest = await marketplace.getRequest(requestId)
-        let request = arrayToObject(arrRequest)
-        let state = await getRequestState(requestId)
-        let slots = await getSlots(requestId, request.ask.slots)
-        let block = await getBlock(blockHash)
-        // populate temp map to constrain state update volume
-        // reqs.set(requestId, {
-        //   ...request,
-        //   state,
-        //   slots: [],
-        //   requestedAt: block.timestamp,
-        //   requestFinishedId: null
-        // })
-        requests.value.set(requestId, {
-          ...request,
-          state,
-          slots,
-          requestedAt: block.timestamp,
-          requestFinishedId: null
-        })
+        await addRequest(requestId, blockHash)
         console.log(`got details for ${i} in ${(Date.now() - start) / 1000} seconds`)
         if (i === events.length - 1) {
           loading.value = false
@@ -127,32 +127,59 @@ export const useRequestsStore = defineStore('request', () => {
       if (events.length === 0) {
         loading.value = false
       }
-      // reqs.forEach((request, requestId) => requests.value.set(requestId, request))
     } catch (error) {
       console.error(`failed to load past contract events: ${error.message}`)
     }
   }
 
+  async function fetchRequest(requestId) {
+    let start = Date.now()
+    console.log('fetching request ', requestId)
+    const preFetched = requests.value.get(requestId)
+    if (preFetched?.detailsFetched) {
+      return
+    }
+    loading.value = true
+    try {
+      let arrRequest = await marketplace.getRequest(requestId)
+      let request = arrayToObject(arrRequest)
+      let slots = await getSlots(requestId, request.ask.slots)
+      const reqExisting = requests.value.get(requestId)
+      requests.value.set(requestId, {
+        ...reqExisting, // state, requestedAt, requestFinishedId (null)
+        ...request,
+        slots,
+        detailsFetched: true
+      })
+    } catch (error) {
+      console.error(`failed to load slots for request ${requestId}: ${error}`)
+      throw error
+    } finally {
+      console.log(`fetched request in ${(Date.now() - start) / 1000}s`)
+      loading.value = false
+    }
+  }
+
   function updateRequestState(requestId, newState) {
-    let { request, state, slots, requestFinishedId } = requests.value.get(requestId)
+    let { state, ...rest } = requests.value.get(requestId)
     state = newState
-    requests.value.set(requestId, { request, state, slots, requestFinishedId })
+    requests.value.set(requestId, { state, ...rest })
   }
 
   function updateRequestFinishedId(requestId, newRequestFinishedId) {
-    let { request, state, slots, requestFinishedId } = requests.value.get(requestId)
+    let { requestFinishedId, ...rest } = requests.value.get(requestId)
     requestFinishedId = newRequestFinishedId
-    requests.value.set(requestId, { request, state, slots, requestFinishedId })
+    requests.value.set(requestId, { requestFinishedId, ...rest })
   }
 
   function updateRequestSlotState(requestId, slotIdx, newState) {
-    let { request, state, slots, requestFinishedId } = requests.value.get(requestId)
+    let { slots, ...rest } = requests.value.get(requestId)
     slots = slots.map((slot) => {
       if (slot.slotIdx == slotIdx) {
         slot.state = newState
       }
     })
-    requests.value.set(requestId, { request, state, slots, requestFinishedId })
+    requests.value.set(requestId, { slots, ...rest })
   }
 
   function waitForRequestFinished(requestId, duration, onRequestFinished) {
@@ -184,22 +211,11 @@ export const useRequestsStore = defineStore('request', () => {
   ) {
     marketplace.on(StorageRequested, async (requestId, ask, expiry, event) => {
       let { blockNumber, blockHash } = event.log
-      let arrRequest = await marketplace.getRequest(requestId)
-      let request = arrayToObject(arrRequest)
-      let state = await getRequestState(requestId)
-      let slots = await getSlots(requestId, request.ask.slots)
-      let block = await getBlock(blockHash)
-      requests.value.set(requestId, {
-        ...request,
-        state,
-        slots,
-        requestedAt: block.timestamp,
-        requestFinishedId: null
-      })
+      const request = addRequest(requestId, blockHash)
 
       // callback
       if (onStorageRequested) {
-        onStorageRequested(blockNumber, requestId, request, state)
+        onStorageRequested(blockNumber, requestId, request.state)
       }
     })
 
@@ -254,11 +270,6 @@ export const useRequestsStore = defineStore('request', () => {
     })
   }
 
-  // const eventsByBlock = computed(() =>)
-  // const doubleCount = computed(() => count.value * 2)
-  // function increment() {
-  //   count.value++
-  // }
   return {
     requests,
     // slots,
@@ -270,7 +281,8 @@ export const useRequestsStore = defineStore('request', () => {
     // requestCancelledEvents,
     // requestFailedEvents,
     // requestFinishedEvents,
-    fetch,
+    fetchPastRequests,
+    fetchRequest,
     listenForNewEvents,
     loading
   }

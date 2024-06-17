@@ -1,16 +1,9 @@
 <script setup>
-import { onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { initDrawers } from 'flowbite'
-
-onMounted(() => {
-  initDrawers()
-})
 </script>
 
 <template>
   <nav class="mx-auto max-w-screen-xl flex flex-wrap items-center justify-between">
-    <!-- <div class=""> -->
     <a href="https://codex.storage/" class="flex items-center rtl:space-x-reverse">
       <img src="../assets/logo.svg" class="h-8 hidden dark:inline" alt="Codex Logo" />
       <img src="../assets/logo-black.svg" class="h-8 inline dark:hidden" alt="Codex Logo" />
@@ -73,7 +66,6 @@ onMounted(() => {
         </li>
       </ul>
     </div>
-    <!-- </div> -->
   </nav>
 </template>
 

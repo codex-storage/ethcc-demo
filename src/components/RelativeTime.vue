@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { computed } from 'vue'
 import { getRelativeTime } from '@feelinglovelynow/get-relative-time'
 import Tooltip from '@/components/Tooltip.vue'
 
@@ -9,14 +9,7 @@ const props = defineProps({
     required: true
   }
 })
-const date = ref(Date.now())
-const relativeTime = ref(getRelativeTime(props.timestamp))
-watch(date, () => (relativeTime.value = getRelativeTime(props.timestamp)))
-let intervalId
-// onMounted(() => {
-//   intervalId = setInterval(() => (date.value = Date.now()), 10000)
-// })
-// onUnmounted(() => clearInterval(intervalId))
+const relativeTime = computed(() => getRelativeTime(props.timestamp))
 </script>
 <template>
   <Tooltip>

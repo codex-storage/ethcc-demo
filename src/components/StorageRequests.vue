@@ -1,14 +1,12 @@
 <script setup>
-import { inject, ref, onMounted, computed } from 'vue'
-import { initModals } from 'flowbite'
+import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useRequestsStore } from '@/stores/requests'
+import { initTooltips } from 'flowbite'
 import { storeToRefs } from 'pinia'
-import CodexImage from '@/components/CodexImage.vue'
+import { useRequestsStore } from '@/stores/requests'
 import StateIndicator from '@/components/StateIndicator.vue'
 import RelativeTime from '@/components/RelativeTime.vue'
 import ShortenValue from '@/components/ShortenValue.vue'
-import { shorten } from '@/utils/ids'
 import { getStateColour } from '@/utils/requests'
 
 const requestsStore = useRequestsStore()
@@ -19,6 +17,9 @@ const requestsOrdered = computed(() => {
     ([reqIdA, reqA], [reqIdB, reqB]) => reqB.requestedAt - reqA.requestedAt
   )
   return sorted
+})
+onMounted(() => {
+  initTooltips()
 })
 </script>
 
@@ -132,14 +133,13 @@ const requestsOrdered = computed(() => {
         >
           <tr>
             <th scope="col" class="px-6 py-3">RequestID</th>
-            <th scope="col" class="px-6 py-3">CID</th>
             <th scope="col" class="px-6 py-3">State</th>
             <th scope="col" class="px-6 py-3">Action</th>
           </tr>
         </thead>
         <tbody>
           <tr
-            v-for="([requestId, { requestedAt, content, state }], idx) in requestsOrdered"
+            v-for="([requestId, { requestedAt, state }], idx) in requestsOrdered"
             :key="{ requestId }"
             class="cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600"
             @click="router.push(`/request/${requestId}`)"
@@ -148,11 +148,6 @@ const requestsOrdered = computed(() => {
               scope="row"
               class="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
             >
-              <CodexImage
-                :local-only="!['New', 'Fulfilled'].includes(state)"
-                :cid="content.cid"
-                class="w-10 h-10 rounded-full mt-1"
-              />
               <div class="ps-3">
                 <div class="text-base font-semibold">
                   <ShortenValue :value="requestId"></ShortenValue>
@@ -163,15 +158,11 @@ const requestsOrdered = computed(() => {
               </div>
             </th>
             <td class="px-6 py-4">
-              <ShortenValue :value="content.cid"></ShortenValue>
-            </td>
-            <td class="px-6 py-4">
               <div class="flex items-center">
                 <StateIndicator :text="state" :color="getStateColour(state)"></StateIndicator>
               </div>
             </td>
             <td class="px-6 py-4">
-              <!-- Modal toggle -->
               <a
                 href="#"
                 type="button"

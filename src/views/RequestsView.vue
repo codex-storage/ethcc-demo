@@ -3,16 +3,14 @@ import { storeToRefs } from 'pinia'
 import { useRequestsStore } from '@/stores/requests'
 import StorageRequests from '@/components/StorageRequests.vue'
 import SkeletonLoading from '@/components/SkeletonLoading.vue'
-import { computed } from 'vue'
 
 const requestsStore = useRequestsStore()
-const { loading, requests } = storeToRefs(requestsStore)
-const isLoading = computed(() => loading.value || !requests.value)
+const { loading } = storeToRefs(requestsStore)
 </script>
 
 <template>
   <div>
-    <SkeletonLoading v-if="isLoading" type="text" />
+    <SkeletonLoading v-if="loading" type="text" />
     <StorageRequests v-else />
   </div>
 </template>

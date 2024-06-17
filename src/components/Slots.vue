@@ -20,14 +20,13 @@ defineProps({
         <tr>
           <th scope="col" class="px-6 py-3">SlotID</th>
           <th scope="col" class="px-6 py-3">Index</th>
-          <th scope="col" class="px-6 py-3">Proofs Missed</th>
           <th scope="col" class="px-6 py-3">Provider</th>
           <th scope="col" class="px-6 py-3">State</th>
         </tr>
       </thead>
       <tbody>
         <tr
-          v-for="({ slotId, slotIdx, state, proofsMissed, provider }, idx) in slots"
+          v-for="({ slotId, slotIdx, state, provider }, idx) in slots"
           :key="{ slotId }"
           class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600"
         >
@@ -38,7 +37,6 @@ defineProps({
             <div class="text-base font-semibold">{{ shorten(slotId) }}</div>
           </th>
           <td class="px-6 py-4">{{ slotIdx }}</td>
-          <td class="px-6 py-4">{{ proofsMissed }}</td>
           <td class="px-6 py-4">{{ shorten(provider) }}</td>
           <td class="px-6 py-4">
             <div class="flex items-center">

@@ -6,7 +6,7 @@ import Balance from '@/components/Balance.vue'
 import BlockNumber from '@/components/BlockNumber.vue'
 import AppNav from '@/components/AppNav.vue'
 import ContractEventAlerts from '@/components/ContractEventAlerts.vue'
-import { initDrawers } from 'flowbite'
+import { initDrawers, initDismisses } from 'flowbite'
 
 const alerts = ref([])
 const id = ref(0)
@@ -38,10 +38,11 @@ function addSlotAlert(type, event, state) {
 onBeforeMount(async () => {})
 
 onMounted(async () => {
-  await requestsStore.fetch()
+  await requestsStore.fetchPastRequests()
   initDrawers()
+  initDismisses()
 
-  function onStorageRequested(blockNumber, requestId, request, state) {
+  function onStorageRequested(blockNumber, requestId, state) {
     alerts.value.push({
       type: 'info',
       event: 'StorageRequested',
