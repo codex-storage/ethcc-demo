@@ -1,19 +1,9 @@
 export default {
   install: (app, { codexRestUrl, myAddress }) => {
-    // const baseUrl = new URL(codexRestUrl)
-    const options = {
-      mode: 'cors'
-    }
     const codexApi = {
-      info: () => {
-        return fetch(`${codexRestUrl}/debug/info`, options)
-      },
-      download: (cid) => {
-        return fetch(`${codexRestUrl}/data/${cid}/network`, options)
-      },
-      downloadLocal: (cid) => {
-        return fetch(`${codexRestUrl}/data/${cid}`, options)
-      }
+      info: () => fetch(`${codexRestUrl}/debug/info`),
+      download: (cid) => fetch(`${codexRestUrl}/data/${cid}/network`),
+      downloadLocal: (cid) => fetch(`${codexRestUrl}/data/${cid}`)
     }
 
     app.provide('myAddress', myAddress)
