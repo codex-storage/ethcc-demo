@@ -7,40 +7,47 @@ import StorageRequest from '@/components/StorageRequest.vue'
 import SkeletonLoading from '@/components/SkeletonLoading.vue'
 
 const requestsStore = useRequestsStore()
-const { requests, loading } = storeToRefs(requestsStore)
+const { requests, loading, fetched } = storeToRefs(requestsStore)
 const route = useRoute()
 const router = useRouter()
-const request = ref(undefined)
+const request = ref(requests.value[route.params.requestId])
 
-async function fetch(requestId) {
+async function fetchRequestDetails(requestId) {
+  console.log('request id route param changed, fetching...')
   try {
     await requestsStore.fetchRequest(requestId)
   } catch (error) {
-    if (error.message.includes('Unknown request')) {
-      router.push({ name: 'NotFound' })
+    if (
+      error.message.includes('Unknown request') ||
+      error.message.includes('invalid BytesLike value')
+    ) {
+      router.push({ path: '/404' })
     }
   }
-  request.value = requests.value[requestId]
 }
+
+// TODO: I don't understand why the request ref isn't reactive and/or v-model
+// can't be set to requests.value[route.params.requestId] directly. So instead,
+// we need this watch
+watch(
+  () => requests.value[route.params.requestId],
+  (req) => {
+    request.value = req
+  }
+)
 
 const hasRequest = computed(() => {
   return request.value !== undefined
 })
 
-watch(() => route.params.requestId, fetch)
+function watchRequestId() {
+  watch(() => route.params.requestId, fetchRequestDetails, { immediate: true })
+}
 
-if (loading.value) {
-  watch(
-    () => loading.value,
-    (isLoading) => {
-      if (!isLoading) {
-        fetch(route.params.requestId)
-      }
-    },
-    { once: true }
-  )
+if (fetched.value) {
+  watchRequestId()
 } else {
-  fetch(route.params.requestId)
+  watch(() => fetched.value, watchRequestId, { once: true })
 }
 </script>
 
