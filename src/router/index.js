@@ -13,27 +13,19 @@ const router = createRouter({
       component: RequestsView
     },
     {
-      path: '/slots',
-      name: 'slots',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/SlotsView.vue')
-    },
-    {
-      path: '/request/:requestId',
-      name: 'request',
+      path: '/request/:requestId?',
+      name: 'Request details',
       component: RequestView,
       props: true // pass :requestId to props in RequestView
     },
     {
       path: '/404',
-      name: 'NotFound',
+      name: '404 not found',
       component: NotFoundView
     },
     {
       path: '/moderate',
-      name: 'Moderate',
+      name: 'Moderate images',
       component: ModerateView
     }
   ]

@@ -7,6 +7,7 @@ import BlockNumber from '@/components/BlockNumber.vue'
 import AppNav from '@/components/AppNav.vue'
 import ContractEventAlerts from '@/components/ContractEventAlerts.vue'
 import { initDrawers, initDismisses } from 'flowbite'
+import NavBreadcrumb from './components/NavBreadcrumb.vue'
 
 const alerts = ref([])
 const id = ref(0)
@@ -173,6 +174,7 @@ onMounted(async () => {
     </header>
     <main class="flex-1 mx-auto max-w-screen-xl w-full p-4">
       <ContractEventAlerts v-model="alerts"></ContractEventAlerts>
+      <NavBreadcrumb></NavBreadcrumb>
       <RouterView />
     </main>
     <footer class="w-full text-center border-t p-4 mt-4 flex-none">
