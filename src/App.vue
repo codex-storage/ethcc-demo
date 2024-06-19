@@ -174,7 +174,7 @@ onUnmounted(() => {
     </header>
     <main class="flex-1 mx-auto max-w-screen-xl w-full p-4">
       <ContractEventAlerts v-model="alerts"></ContractEventAlerts>
-      <NavBreadcrumb></NavBreadcrumb>
+      <NavBreadcrumb class="mb-4"></NavBreadcrumb>
       <RouterView />
     </main>
     <footer class="w-full text-center border-t p-4 mt-4 flex-none">

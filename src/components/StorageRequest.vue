@@ -37,13 +37,16 @@ const stateColour = computed(() => getStateColour(request.value.state))
 <template>
   <div class="flex flex-wrap">
     <CodexImage
-      class="flex-initial mx-auto my-8 lg:my-16 min-w-sm max-w-md w-full rounded"
+      class="flex-initial mx-auto my-4 min-w-sm max-w-md w-full rounded"
       :cid="request.content.cid"
       :local-only="!['New', 'Fulfilled'].includes(request.state)"
       :moderated="enableModeration ? 'approved' : request.moderated"
     ></CodexImage>
-    <div class="py-8 px-4 ml-4 max-w-2xl lg:py-16 flex-1">
-      <div v-if="enableModeration === true" class="mb-4 p-5 w-full border border-gray-300 rounded-lg b-1 bg-gray-100">
+    <div class="py-4 px-4 ml-4 max-w-2xl flex-1">
+      <div
+        v-if="enableModeration === true"
+        class="mb-4 p-5 w-full border border-gray-300 rounded-lg b-1 bg-gray-100"
+      >
         <label for="moderation" class="block mb-2 text-lg font-medium text-gray-900 dark:text-white"
           >Moderation station</label
         >
