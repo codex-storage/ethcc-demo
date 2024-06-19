@@ -16,9 +16,20 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  alt: String
+  alt: String,
+  moderated: {
+    type: [String],
+    default() {
+      return 'pending'
+    },
+    validator(value, props) {
+      // The value must match one of these strings
+      return ['pending', 'approved', 'banned'].includes(value)
+    }
+  }
 })
 const hidden = computed(() => props.cid === undefined)
+const blurred = computed(() => ['pending', 'banned'].includes(props.moderated))
 
 onMounted(async () => {
   if (hidden.value) {
@@ -66,6 +77,19 @@ onMounted(async () => {
       <span class="sr-only">{{ error }}</span>
     </div>
 
-    <img v-else-if="imgSrc" :src="imgSrc" class="rounded-full" :alt="props.alt" />
+    <img
+      v-else-if="imgSrc"
+      :src="imgSrc"
+      class="rounded-lg"
+      :alt="props.alt"
+      :class="{ 'blur-xxl': blurred }"
+    />
   </div>
 </template>
+<style scoped>
+.blur-xxl {
+  --tw-blur: blur(76px);
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale)
+    var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+</style>

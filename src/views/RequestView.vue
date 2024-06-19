@@ -20,7 +20,7 @@ async function fetch(requestId) {
       router.push({ name: 'NotFound' })
     }
   }
-  request.value = requests.value.get(requestId)
+  request.value = requests.value[requestId]
 }
 
 const hasRequest = computed(() => {
@@ -47,6 +47,11 @@ if (loading.value) {
 <template>
   <div>
     <SkeletonLoading v-if="loading" type="image" />
-    <StorageRequest v-else-if="hasRequest" :requestId="route.params.requestId" :request="request" />
+    <StorageRequest
+      v-else-if="hasRequest"
+      :requestId="route.params.requestId"
+      v-model="request"
+      :enableModeration="route.query.enableModeration === 'true'"
+    />
   </div>
 </template>

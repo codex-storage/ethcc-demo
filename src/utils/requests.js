@@ -41,6 +41,12 @@ export function getStateColour(state) {
   }
 }
 
+export const moderatedState = {
+  pending: { text: 'Pending 🤷‍♂️', color: 'gray' },
+  approved: { text: 'Approved ✅', color: 'green' },
+  banned: { text: 'NSFW! 🫣', color: 'red' }
+}
+
 export const requestState = [
   'New', // [default] waiting to fill slots
   'Fulfilled', // all slots filled, accepting regular proofs

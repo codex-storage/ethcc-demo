@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, onMounted, ref } from 'vue'
+import { onBeforeMount, onMounted, ref, onScopeDispose } from 'vue'
 import { useRequestsStore } from '@/stores/requests'
 import { RouterView } from 'vue-router'
 import Balance from '@/components/Balance.vue'
@@ -116,6 +116,18 @@ onMounted(async () => {
     onSlotFreed,
     onSlotFilled
   )
+
+  function handleStorageEvent(event) {
+    if(event.key === 'requests') {
+      requestsStore.$hydrate()
+    }
+  }
+
+  window.addEventListener('storage', handleStorageEvent)
+
+  onScopeDispose(() => {
+    window.removeEventListener('storage', handleStorageEvent)
+  })
 })
 </script>
 

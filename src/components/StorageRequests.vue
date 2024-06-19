@@ -7,17 +7,28 @@ import { useRequestsStore } from '@/stores/requests'
 import StateIndicator from '@/components/StateIndicator.vue'
 import RelativeTime from '@/components/RelativeTime.vue'
 import ShortenValue from '@/components/ShortenValue.vue'
-import { getStateColour } from '@/utils/requests'
+import {
+  getStateColour,
+  moderatedState
+} from '@/utils/requests'
 
 const requestsStore = useRequestsStore()
 const { requests } = storeToRefs(requestsStore)
 const router = useRouter()
 const requestsOrdered = computed(() => {
-  const sorted = [...requests.value.entries()].sort(
+  const sorted = [...Object.entries(requests.value)].sort(
     ([reqIdA, reqA], [reqIdB, reqB]) => reqB.requestedAt - reqA.requestedAt
   )
   return sorted
 })
+
+const props = defineProps({
+  enableModeration: {
+    type: Boolean,
+    default: false
+  }
+})
+
 onMounted(() => {
   initTooltips()
 })
@@ -133,16 +144,17 @@ onMounted(() => {
         >
           <tr>
             <th scope="col" class="px-6 py-3">RequestID</th>
+            <th v-if="enableModeration" scope="col" class="px-6 py-3">Moderated</th>
             <th scope="col" class="px-6 py-3">State</th>
             <th scope="col" class="px-6 py-3">Action</th>
           </tr>
         </thead>
         <tbody>
           <tr
-            v-for="([requestId, { requestedAt, state }], idx) in requestsOrdered"
+            v-for="([requestId, { requestedAt, moderated, state }], idx) in requestsOrdered"
             :key="{ requestId }"
-            class="cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600"
-            @click="router.push(`/request/${requestId}`)"
+            class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600"
+            @click="router.push({ path: `/request/${requestId}`, query: { enableModeration } })"
           >
             <th
               scope="row"
@@ -157,6 +169,14 @@ onMounted(() => {
                 </div>
               </div>
             </th>
+            <td v-if="enableModeration" class="px-6 py-4">
+              <div class="flex items-center">
+                <StateIndicator
+                  :color="moderatedState[moderated].color"
+                  :text="moderatedState[moderated].text"
+                ></StateIndicator>
+              </div>
+            </td>
             <td class="px-6 py-4">
               <div class="flex items-center">
                 <StateIndicator :text="state" :color="getStateColour(state)"></StateIndicator>

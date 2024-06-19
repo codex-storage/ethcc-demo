@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import RequestsView from '../views/RequestsView.vue'
 import RequestView from '../views/RequestView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
+import ModerateView from '../views/ModerateView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,6 +30,11 @@ const router = createRouter({
       path: '/404',
       name: 'NotFound',
       component: NotFoundView
+    },
+    {
+      path: '/moderate',
+      name: 'Moderate',
+      component: ModerateView
     }
   ]
 })
