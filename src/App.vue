@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, onMounted, ref, onUnmounted } from 'vue'
+import { onBeforeMount, onMounted, ref, onUnmounted, inject } from 'vue'
 import { useRequestsStore } from '@/stores/requests'
 import { RouterView } from 'vue-router'
 import Balance from '@/components/Balance.vue'
@@ -124,8 +124,10 @@ onMounted(async () => {
   window.addEventListener('storage', handleStorageEvent)
 })
 
+const getLocalStorageKey = inject('getLocalStorageKey')
+const localStorageKey = getLocalStorageKey(requestsStore.$id)
 function handleStorageEvent(event) {
-  if (event.key === 'requests') {
+  if (event.key === localStorageKey) {
     requestsStore.$hydrate()
   }
 }

@@ -2,7 +2,7 @@
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+import { createPersistedState } from 'pinia-plugin-persistedstate'
 import uniqueId from '@/plugins/UniqueIdPlugin'
 
 import App from '@/App.vue'
@@ -17,9 +17,12 @@ import './index.css'
 const app = createApp(App)
 
 const pinia = createPinia()
+
+const getLocalStorageKey = (id) => `__persisted__${id}__${ENV.marketplaceAddress}`
+app.provide('getLocalStorageKey', getLocalStorageKey)
 pinia.use(
   createPersistedState({
-    key: (id) => `__persisted__${id}__${ENV.marketplaceAddress}`
+    key: getLocalStorageKey
   })
 )
 
@@ -34,9 +37,10 @@ const environments = {
     codexRestUrl: 'http://localhost:8080/api/codex/v1'
   },
   devnet: {
-    // marketplaceAddress: '0x9C88D67c7C745D2F0A4E411c18A6a22c15b37EaA', // new devnet contracts
-    marketplaceAddress: '0x4cBDfab37baB0AA3AC69A7b12C4396907dfF5227', // old devnet contracts
-    testTokenAddress: '0x150493837F923E71Ad8289742Ae8f2Bd7a478964',
+    marketplaceAddress: '0x9C88D67c7C745D2F0A4E411c18A6a22c15b37EaA', // new devnet contracts
+    // marketplaceAddress: '0x4cBDfab37baB0AA3AC69A7b12C4396907dfF5227', // old devnet contracts
+    // testTokenAddress: '0x150493837F923E71Ad8289742Ae8f2Bd7a478964',
+    testTokenAddress: '0x2B16F50C501246400279b225268E513E161a97b4', // new token address
     myAddress: '0xE3b2588a05260caC3EEAbfBFd7937BbC14eB0aC7',
     rpcUrl: 'https://rpc.testnet.codex.storage',
     codexRestUrl: 'http://localhost:8080/api/codex/v1'
