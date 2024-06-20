@@ -4,14 +4,17 @@ import { useRequestsStore } from '@/stores/requests'
 import { RouterView } from 'vue-router'
 import Balance from '@/components/Balance.vue'
 import BlockNumber from '@/components/BlockNumber.vue'
+import ToastNotification from '@/components/toasts/ToastNotification.vue'
 import AppNav from '@/components/AppNav.vue'
 import ContractEventAlerts from '@/components/ContractEventAlerts.vue'
 import { initDrawers, initDismisses } from 'flowbite'
 import NavBreadcrumb from './components/NavBreadcrumb.vue'
+import { storeToRefs } from 'pinia'
 
 const alerts = ref([])
 const id = ref(0)
 const requestsStore = useRequestsStore()
+const { loadingRecent } = storeToRefs(requestsStore)
 
 function addAlert(type, event, state) {
   alerts.value.push({
@@ -181,6 +184,11 @@ onUnmounted(() => {
       <Balance />
       <BlockNumber />
     </footer>
+    <ToastNotification
+      class="fixed bottom-5 right-5"
+      v-if="loadingRecent"
+      text="Loading recent storage requests..."
+    ></ToastNotification>
   </div>
 </template>
 

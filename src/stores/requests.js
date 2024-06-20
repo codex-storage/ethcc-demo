@@ -380,6 +380,7 @@ export const useRequestsStore = defineStore(
       fetchRequestDetails,
       listenForNewEvents,
       loading,
+      loadingRecent,
       fetched
     }
   },
