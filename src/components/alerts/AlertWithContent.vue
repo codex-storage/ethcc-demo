@@ -1,7 +1,7 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
-import { initDismisses } from 'flowbite'
-import { RouterLink } from 'vue-router'
+import { onMounted, computed } from 'vue'
+import { initDismisses, Dismiss } from 'flowbite'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   id: {
@@ -32,127 +32,142 @@ const props = defineProps({
   }
 })
 
-const theme = reactive({
-  bubble: [
-    'text-blue-800',
-    'border-blue-300',
-    'bg-blue-50',
-    'dark:text-blue-400',
-    'dark:border-blue-800',
-    'dark:bg-gray-800'
-  ],
-  btnMore: [
-    'bg-blue-800',
-    'hover:bg-blue-900',
-    'focus:ring-blue-300',
-    'dark:bg-blue-600',
-    'dark:hover:bg-blue-700',
-    'dark:focus:ring-blue-800'
-  ],
-  btnDismiss: [
-    'text-blue-800',
-    'border-blue-800',
-    'hover:bg-blue-900',
-    'focus:ring-blue-300',
-    'dark:text-blue-400',
-    'dark:border-blue-600',
-    'dark:hover:bg-blue-700',
-    'dark:focus:ring-blue-800'
-  ]
+const router = useRouter()
+
+const theme = computed(() => {
+  switch (props.type) {
+    case 'success':
+      return {
+        bubble: [
+          'text-green-800',
+          'border-green-300',
+          'bg-green-50',
+          'dark:text-green-400',
+          'dark:border-green-800',
+          'dark:bg-gray-800'
+        ],
+        btnMore: [
+          'bg-green-800',
+          'hover:bg-green-900',
+          'focus:ring-green-300',
+          'dark:bg-green-600',
+          'dark:hover:bg-green-700',
+          'dark:focus:ring-green-800'
+        ],
+        btnDismiss: [
+          'text-green-800',
+          'border-green-800',
+          'hover:bg-green-900',
+          'focus:ring-green-300',
+          'dark:text-green-400',
+          'dark:border-green-600',
+          'dark:hover:bg-green-700',
+          'dark:focus:ring-green-800'
+        ]
+      }
+
+    case 'danger':
+      return {
+        bubble: [
+          'text-red-800',
+          'border-red-300',
+          'bg-red-50',
+          'dark:text-red-400',
+          'dark:border-red-800',
+          'dark:bg-gray-800'
+        ],
+        btnMore: [
+          'bg-red-800',
+          'hover:bg-red-900',
+          'focus:ring-red-300',
+          'dark:bg-red-600',
+          'dark:hover:bg-red-700',
+          'dark:focus:ring-red-800'
+        ],
+        btnDismiss: [
+          'text-red-800',
+          'border-red-800',
+          'hover:bg-red-900',
+          'focus:ring-red-300',
+          'dark:text-red-400',
+          'dark:border-red-600',
+          'dark:hover:bg-red-700',
+          'dark:focus:ring-red-800'
+        ]
+      }
+
+    case 'warning':
+      return {
+        bubble: [
+          'text-yellow-800',
+          'border-yellow-300',
+          'bg-yellow-50',
+          'dark:text-yellow-400',
+          'dark:border-yellow-800',
+          'dark:bg-gray-800'
+        ],
+        btnMore: [
+          'bg-yellow-800',
+          'hover:bg-yellow-900',
+          'focus:ring-yellow-300',
+          'dark:bg-yellow-600',
+          'dark:hover:bg-yellow-700',
+          'dark:focus:ring-yellow-800'
+        ],
+        btnDismiss: [
+          'text-yellow-800',
+          'border-yellow-800',
+          'hover:bg-yellow-900',
+          'focus:ring-yellow-300',
+          'dark:text-yellow-400',
+          'dark:border-yellow-600',
+          'dark:hover:bg-yellow-700',
+          'dark:focus:ring-yellow-800'
+        ]
+      }
+
+    default:
+      return {
+        bubble: [
+          'text-blue-800',
+          'border-blue-300',
+          'bg-blue-50',
+          'dark:text-blue-400',
+          'dark:border-blue-800',
+          'dark:bg-gray-800'
+        ],
+        btnMore: [
+          'bg-blue-800',
+          'hover:bg-blue-900',
+          'focus:ring-blue-300',
+          'dark:bg-blue-600',
+          'dark:hover:bg-blue-700',
+          'dark:focus:ring-blue-800'
+        ],
+        btnDismiss: [
+          'text-blue-800',
+          'border-blue-800',
+          'hover:bg-blue-900',
+          'focus:ring-blue-300',
+          'dark:text-blue-400',
+          'dark:border-blue-600',
+          'dark:hover:bg-blue-700',
+          'dark:focus:ring-blue-800'
+        ]
+      }
+  }
 })
 
 onMounted(() => {
   initDismisses()
-
-  switch (props.type) {
-    case 'success':
-      theme.bubble = [
-        'text-green-800',
-        'border-green-300',
-        'bg-green-50',
-        'dark:text-green-400',
-        'dark:border-green-800',
-        'dark:bg-gray-800'
-      ]
-      theme.btnMore = [
-        'bg-green-800',
-        'hover:bg-green-900',
-        'focus:ring-green-300',
-        'dark:bg-green-600',
-        'dark:hover:bg-green-700',
-        'dark:focus:ring-green-800'
-      ]
-      theme.btnDismiss = [
-        'text-green-800',
-        'border-green-800',
-        'hover:bg-green-900',
-        'focus:ring-green-300',
-        'dark:text-green-400',
-        'dark:border-green-600',
-        'dark:hover:bg-green-700',
-        'dark:focus:ring-green-800'
-      ]
-      break
-
-    case 'danger':
-      theme.bubble = [
-        'text-red-800',
-        'border-red-300',
-        'bg-red-50',
-        'dark:text-red-400',
-        'dark:border-red-800',
-        'dark:bg-gray-800'
-      ]
-      theme.btnMore = [
-        'bg-red-800',
-        'hover:bg-red-900',
-        'focus:ring-red-300',
-        'dark:bg-red-600',
-        'dark:hover:bg-red-700',
-        'dark:focus:ring-red-800'
-      ]
-      theme.btnDismiss = [
-        'text-red-800',
-        'border-red-800',
-        'hover:bg-red-900',
-        'focus:ring-red-300',
-        'dark:text-red-400',
-        'dark:border-red-600',
-        'dark:hover:bg-red-700',
-        'dark:focus:ring-red-800'
-      ]
-      break
-
-    case 'warning':
-      theme.bubble = [
-        'text-yellow-800',
-        'border-yellow-300',
-        'bg-yellow-50',
-        'dark:text-yellow-400',
-        'dark:border-yellow-800',
-        'dark:bg-gray-800'
-      ]
-      theme.btnMore = [
-        'bg-yellow-800',
-        'hover:bg-yellow-900',
-        'focus:ring-yellow-300',
-        'dark:bg-yellow-600',
-        'dark:hover:bg-yellow-700',
-        'dark:focus:ring-yellow-800'
-      ]
-      theme.btnDismiss = [
-        'text-yellow-800',
-        'border-yellow-800',
-        'hover:bg-yellow-900',
-        'focus:ring-yellow-300',
-        'dark:text-yellow-400',
-        'dark:border-yellow-600',
-        'dark:hover:bg-yellow-700',
-        'dark:focus:ring-yellow-800'
-      ]
-      break
-  }
 })
+
+function dismissAndRedirect(targetElId, url) {
+  let targetEl = document.getElementById(targetElId)
+  let dismiss = new Dismiss(targetEl)
+  dismiss.hide()
+  router.push({ path: url })
+}
 </script>
 <template>
   <div :id="id" class="p-4 mt-4 mb-4 border rounded-lg" :class="theme.bubble" role="alert">
@@ -175,10 +190,10 @@ onMounted(() => {
       <slot></slot>
     </div>
     <div class="flex">
-      <RouterLink
-        :to="btnMoreUrl"
+      <button
         class="text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-3 py-1.5 me-2 text-center inline-flex items-center"
         :class="theme.btnMore"
+        @click="dismissAndRedirect(id, btnMoreUrl)"
       >
         <svg
           class="me-2 h-3 w-3"
@@ -192,7 +207,7 @@ onMounted(() => {
           />
         </svg>
         {{ btnMoreText }}
-      </RouterLink>
+      </button>
       <button
         type="button"
         class="bg-transparent border hover:text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-xs px-3 py-1.5 text-center dark:hover:text-white"
