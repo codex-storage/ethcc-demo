@@ -6,6 +6,9 @@ const blockNumber = ref(0)
 
 onMounted(async () => {
   blockNumber.value = await ethProvider.getBlockNumber()
+  ethProvider.on('block', (newBlockNum) => {
+    blockNumber.value = newBlockNum
+  })
 })
 </script>
 
