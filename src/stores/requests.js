@@ -205,10 +205,12 @@ export const useRequestsStore = defineStore(
           detailsLoading: false
         }
       } catch (error) {
-        console.error(`failed to load slots for request ${requestId}: ${error}`)
+        if (error.message.includes('Unknown request')) {
+          delete requests.value[requestId]
+        } else {
+          console.error(`failed to load slots for request ${requestId}: ${error}`)
+        }
         throw error
-      } finally {
-        requests.value[requestId].detailsLoading = false
       }
     }
 
