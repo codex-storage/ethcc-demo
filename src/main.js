@@ -17,7 +17,11 @@ import './index.css'
 const app = createApp(App)
 
 const pinia = createPinia()
-pinia.use(piniaPluginPersistedstate)
+pinia.use(
+  createPersistedState({
+    key: (id) => `__persisted__${id}__${ENV.marketplaceAddress}`
+  })
+)
 
 app.use(pinia)
 app.use(router)
