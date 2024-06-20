@@ -45,6 +45,7 @@ export const useRequestsStore = defineStore(
     // const requestFailedEvents = ref([]) // {blockNumber, requestId}
     // const requestFinishedEvents = ref([]) // {blockNumber, requestId}
     const loading = ref(false)
+    const loadingRecent = ref(false)
     const fetched = ref(false) // indicates if past events were fetched
     const blocks = ref({})
     // const request = computed(() => count.value * 2)
@@ -97,27 +98,26 @@ export const useRequestsStore = defineStore(
       }
       console.log(`fetched ${numSlots} slots in ${(Date.now() - start) / 1000}s`)
       return slots
-      // blockNumbers.value.add(blockNumber)
     }
 
     const getBlock = async (blockHash) => {
       if (Object.keys(blocks.value).includes(blockHash)) {
         return blocks.value[blockHash]
       } else {
-        let block = await ethProvider.getBlock(blockHash)
-        blocks.value[blockHash] = block
-        return block
+        let { number, timestamp } = await ethProvider.getBlock(blockHash)
+        blocks.value[blockHash] = { number, timestamp }
+        return { number, timestamp }
       }
     }
 
     async function addRequest(requestId, blockHash) {
       let state = await getRequestState(requestId)
-      let block = await getBlock(blockHash)
+      let { timestamp } = await getBlock(blockHash)
       let reqExisting = requests.value[requestId] || {} // just in case it already exists
       let request = {
         ...reqExisting,
         state,
-        requestedAt: block.timestamp,
+        requestedAt: timestamp,
         requestFinishedId: null,
         detailsFetched: false,
         moderated: 'pending'
@@ -126,43 +126,60 @@ export const useRequestsStore = defineStore(
       return request
     }
 
-    async function fetchPastRequests() {
-      // query past events
-      if (fetched.value) {
-        console.log('skipping fetching past requests, already fetched')
-        return
-      }
-      console.log('fetching past requests')
-      loading.value = true
+    async function handleStorageRequestEvent(event) {
+      let { requestId, ask, expiry } = event.args
+      let { blockHash, blockNumber } = event
+      await addRequest(requestId, blockHash)
+    }
+
+    // Returns an array of Promises, where each Promise represents the fetching
+    // of one StorageRequested event
+    async function fetchPastRequestsFrom(fromBlock = null) {
+      console.log(`fetching past requests from ${fromBlock ? `block ${fromBlock}` : 'all time'}`)
       try {
-        let events = await marketplace.queryFilter(StorageRequested)
+        let events = await marketplace.queryFilter(StorageRequested, fromBlock)
         console.log('got ', events.length, ' StorageRequested events')
-        events.forEach(async (event, i) => {
-          console.log('getting details for StorageRequested event ', i)
-          let start = Date.now()
-          let { requestId, ask, expiry } = event.args
-          let { blockHash, blockNumber } = event
-          await addRequest(requestId, blockHash)
-          console.log(`got details for ${i} in ${(Date.now() - start) / 1000} seconds`)
-          if (i === events.length - 1) {
-            loading.value = false
-            fetched.value = true
-          }
-        })
         if (events.length === 0) {
-          loading.value = false
-          fetched.value = true
+          return []
         }
+
+        return events.map((event, i) => handleStorageRequestEvent(event)) //{
+
       } catch (error) {
         console.error(`failed to load past contract events: ${error.message}`)
+        return []
       }
     }
 
-    async function fetchRequest(requestId) {
+    async function fetchPastRequests() {
+      // query past events
+      const blocksSorted = Object.values(blocks.value).sort(
+        (blkA, blkB) => blkB.number - blkA.number
+      )
+      const lastBlockNumber = blocksSorted.length ? blocksSorted[0].number : null
+
+      if (lastBlockNumber) {
+        loadingRecent.value = true
+      } else {
+        loading.value = true
+      }
+
+      await Promise.all(await fetchPastRequestsFrom(lastBlockNumber + 1))
+
+      if (lastBlockNumber) {
+        loadingRecent.value = false
+      } else {
+        loading.value = false
+        fetched.value = true
+      }
+    }
+
+    async function fetchRequestDetails(requestId) {
       let start = Date.now()
-      console.log('fetching request ', requestId)
+      console.log('fetching request', requestId)
       const preFetched = requests.value[requestId] || {}
       if (preFetched?.detailsFetched) {
+        console.log('request', requestId, 'already fetched')
         return
       }
       loading.value = true
@@ -224,7 +241,7 @@ export const useRequestsStore = defineStore(
           updateRequestFinishedId(requestId, null)
         } catch (error) {
           if (error instanceof RequestNotFoundError) {
-            await fetchRequest(requestId)
+            await fetchRequestDetails(requestId)
           }
         }
         if (onRequestFinished) {
@@ -284,7 +301,7 @@ export const useRequestsStore = defineStore(
           updateRequestState(requestId, 'Cancelled')
         } catch (error) {
           if (error instanceof RequestNotFoundError) {
-            await fetchRequest(requestId)
+            await fetchRequestDetails(requestId)
           }
         }
 
@@ -299,7 +316,7 @@ export const useRequestsStore = defineStore(
           cancelWaitForRequestFinished(requestId)
         } catch (error) {
           if (error instanceof RequestNotFoundError) {
-            await fetchRequest(requestId)
+            await fetchRequestDetails(requestId)
           }
         }
 
@@ -313,7 +330,7 @@ export const useRequestsStore = defineStore(
           updateRequestSlotState(requestId, slotIdx, 'Freed')
         } catch (error) {
           if (error instanceof RequestNotFoundError) {
-            await fetchRequest(requestId)
+            await fetchRequestDetails(requestId)
           }
         }
 
@@ -327,7 +344,7 @@ export const useRequestsStore = defineStore(
           updateRequestSlotState(requestId, slotIdx, 'Filled')
         } catch (error) {
           if (error instanceof RequestNotFoundError) {
-            await fetchRequest(requestId)
+            await fetchRequestDetails(requestId)
           }
         }
 
@@ -340,6 +357,7 @@ export const useRequestsStore = defineStore(
 
     return {
       requests,
+      blocks,
       // slots,
       // blockNumbers,
       // storageRequestedEvents,
@@ -350,7 +368,7 @@ export const useRequestsStore = defineStore(
       // requestFailedEvents,
       // requestFinishedEvents,
       fetchPastRequests,
-      fetchRequest,
+      fetchRequestDetails,
       listenForNewEvents,
       loading,
       fetched
@@ -360,7 +378,11 @@ export const useRequestsStore = defineStore(
     persist: {
       serializer: {
         serialize: (state) => {
-          return JSON.stringify(state, (_, v) => (typeof v === 'bigint' ? v.toString() : v))
+          try {
+            return JSON.stringify(state, (_, v) => (typeof v === 'bigint' ? v.toString() : v))
+          } catch (e) {
+            console.error(`failure serializing state`, e)
+          }
         },
         deserialize: (serialized) => {
           // TODO: deserialize bigints properly
