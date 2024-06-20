@@ -144,7 +144,6 @@ export const useRequestsStore = defineStore(
         }
 
         return events.map((event, i) => handleStorageRequestEvent(event)) //{
-
       } catch (error) {
         console.error(`failed to load past contract events: ${error.message}`)
         return []
@@ -175,31 +174,41 @@ export const useRequestsStore = defineStore(
     }
 
     async function fetchRequestDetails(requestId) {
-      let start = Date.now()
-      console.log('fetching request', requestId)
-      const preFetched = requests.value[requestId] || {}
-      if (preFetched?.detailsFetched) {
-        console.log('request', requestId, 'already fetched')
-        return
-      }
-      loading.value = true
       try {
-        let arrRequest = await marketplace.getRequest(requestId)
-        let request = arrayToObject(arrRequest)
-        let slots = await getSlots(requestId, request.ask.slots)
-        const reqExisting = requests.value[requestId] || {}
+        // const reqExisting = requests.value[requestId] || {}
+        if (!requests.value[requestId]) {
+          requests.value[requestId] = {}
+        }
+        requests.value[requestId].detailsLoading = true
+
+        let request = requests.value[requestId]
+        // fetch request details if not previously fetched
+        if (request?.detailsFetched !== true) {
+          console.log('request', requestId, ' details already fetched')
+          request = arrayToObject(await marketplace.getRequest(requestId))
+        }
+
+        // always fetch slots
+        console.log('fetching slots for request', requestId)
+        getSlots(requestId, request.ask.slots).then((slots) => {
+          requests.value[requestId].slots = slots
+          requests.value[requestId].slotsLoading = false
+          requests.value[requestId].slotsFetched = true
+        })
+
+        // update state
         requests.value[requestId] = {
-          ...reqExisting, // state, requestedAt, requestFinishedId (null)
+          ...requests.value[requestId], // state, requestedAt, requestFinishedId (null)
           ...request,
-          slots,
-          detailsFetched: true
+          slotsLoading: true,
+          detailsFetched: true,
+          detailsLoading: false
         }
       } catch (error) {
         console.error(`failed to load slots for request ${requestId}: ${error}`)
         throw error
       } finally {
-        console.log(`fetched request in ${(Date.now() - start) / 1000}s`)
-        loading.value = false
+        requests.value[requestId].detailsLoading = false
       }
     }
 

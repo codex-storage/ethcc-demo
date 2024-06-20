@@ -11,6 +11,7 @@ import StateIndicator from '@/components/StateIndicator.vue'
 import RelativeTime from '@/components/RelativeTime.vue'
 import ShortenValue from '@/components/ShortenValue.vue'
 import Slots from './Slots.vue'
+import SkeletonLoading from './SkeletonLoading.vue'
 
 const request = defineModel()
 const props = defineProps({
@@ -19,6 +20,14 @@ const props = defineProps({
     required: true
   },
   enableModeration: {
+    type: Boolean,
+    default: false
+  },
+  slotsLoading: {
+    type: Boolean,
+    default: false
+  },
+  slotsFetched: {
     type: Boolean,
     default: false
   }
@@ -179,7 +188,8 @@ const stateColour = computed(() => getStateColour(request.value.state))
         </table>
       </div>
 
-      <Slots :slots="request.slots"></Slots>
+      <SkeletonLoading v-if="slotsLoading && !slotsFetched" type="text" />
+      <Slots v-else :slots="request.slots"></Slots>
     </div>
   </div>
 </template>

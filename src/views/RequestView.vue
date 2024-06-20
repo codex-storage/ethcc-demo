@@ -26,26 +26,21 @@ async function fetchRequest(requestId) {
 }
 
 const request = computed(() => requests.value[route.params.requestId])
+const detailsLoading = computed(() => requests.value[route.params.requestId].detailsLoading)
 
-function watchRequestId() {
-  watch(() => route.params.requestId, fetchRequest, { immediate: true })
-}
-
-if (fetched.value) {
-  watchRequestId()
-} else {
-  watch(() => fetched.value, watchRequestId, { once: true })
-}
+watch(() => route.params.requestId, fetchRequest, { immediate: true })
 </script>
 
 <template>
   <div>
-    <SkeletonLoading v-if="loading" type="image" />
+    <SkeletonLoading v-if="loading || detailsLoading" type="image" />
     <StorageRequest
       v-else
       :requestId="route.params.requestId"
       v-model="request"
       :enableModeration="route.query.enableModeration === 'true'"
+      :slotsLoading="request.slotsLoading"
+      :slotsFetched="request.slotsFetched"
     />
   </div>
 </template>
