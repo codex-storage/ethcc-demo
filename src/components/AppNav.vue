@@ -4,13 +4,13 @@ import { RouterLink } from 'vue-router'
 
 <template>
   <nav class="mx-auto max-w-screen-xl flex flex-wrap items-center justify-between">
-    <a href="https://codex.storage/" class="flex items-center rtl:space-x-reverse">
+    <RouterLink to="/" class="flex items-center relative rtl:space-x-reverse">
       <img src="../assets/logo.svg" class="h-8 hidden dark:inline" alt="Codex Logo" />
       <img src="../assets/logo-black.svg" class="h-8 inline dark:hidden" alt="Codex Logo" />
       <span class="self-center ml-3 text-2xl font-semibold whitespace-nowrap dark:text-white"
         >Codex</span
       >
-    </a>
+    </RouterLink>
     <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
       <button
         type="button"

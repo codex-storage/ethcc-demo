@@ -47,7 +47,6 @@ export const useRequestsStore = defineStore(
     const loading = ref(false)
     const fetched = ref(false) // indicates if past events were fetched
     const blocks = ref({})
-
     // const request = computed(() => count.value * 2)
 
     // onStorageRequested => add request to requests ref, along with slots

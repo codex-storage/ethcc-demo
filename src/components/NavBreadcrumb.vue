@@ -12,17 +12,31 @@ const routeName = computed(() => {
     return route.name
   }
 })
-const firstLinkMeta = computed(() =>
-  Object.keys(route.query).includes('enableModeration')
-    ? {
-        to: '/moderate',
-        name: 'Moderate'
-      }
-    : {
-        to: '/',
-        name: 'Requests'
-      }
-)
+const firstLinkMeta = computed(() => {
+  if (route.query.enableModeration === 'true' || route.path === '/moderate') {
+    return {
+      to: '/moderate',
+      name: 'Moderate'
+    }
+  } else {
+    return {
+      to: '/',
+      name: 'Requests'
+    }
+  }
+})
+const secondLinkMeta = computed(() => {
+  if (['/', '/moderate'].includes(route.path)) {
+    return {
+      visible: false
+    }
+  } else {
+    return {
+      visible: true,
+      name: routeName.value
+    }
+  }
+})
 </script>
 <template>
   <!-- Breadcrumb -->
@@ -50,7 +64,7 @@ const firstLinkMeta = computed(() =>
           {{ firstLinkMeta.name }}
         </RouterLink>
       </li>
-      <li v-if="route.path !== '/'" aria-current="page">
+      <li v-if="secondLinkMeta.visible" aria-current="page">
         <div class="flex items-center">
           <svg
             class="rtl:rotate-180 w-3 h-3 mx-1 text-gray-400"
@@ -67,9 +81,9 @@ const firstLinkMeta = computed(() =>
               d="m1 9 4-4-4-4"
             />
           </svg>
-          <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2 dark:text-gray-400">{{
-            routeName
-          }}</span>
+          <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2 dark:text-gray-400">
+            {{ secondLinkMeta.name }}</span
+          >
         </div>
       </li>
     </ol>
