@@ -7,22 +7,19 @@ import { useRequestsStore } from '@/stores/requests'
 import StateIndicator from '@/components/StateIndicator.vue'
 import RelativeTime from '@/components/RelativeTime.vue'
 import ShortenValue from '@/components/ShortenValue.vue'
-import {
-  getStateColour,
-  moderatedState
-} from '@/utils/requests'
+import { getStateColour, moderatedState } from '@/utils/requests'
 
 const requestsStore = useRequestsStore()
 const { requests } = storeToRefs(requestsStore)
 const router = useRouter()
 const requestsOrdered = computed(() => {
-  const sorted = [...Object.entries(requests.value)].sort(
+  const sorted = Object.entries(requests.value).sort(
     ([reqIdA, reqA], [reqIdB, reqB]) => reqB.requestedAt - reqA.requestedAt
   )
   return sorted
 })
 
-const props = defineProps({
+defineProps({
   enableModeration: {
     type: Boolean,
     default: false

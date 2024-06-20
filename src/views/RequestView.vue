@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRequestsStore } from '@/stores/requests'
 import { useRoute, useRouter } from 'vue-router'
@@ -10,12 +10,11 @@ const requestsStore = useRequestsStore()
 const { requests, loading, fetched } = storeToRefs(requestsStore)
 const route = useRoute()
 const router = useRouter()
-const request = ref(requests.value[route.params.requestId])
 
-async function fetchRequestDetails(requestId) {
+async function fetchRequest(requestId) {
   console.log('request id route param changed, fetching...')
   try {
-    await requestsStore.fetchRequest(requestId)
+    await requestsStore.fetchRequestDetails(requestId)
   } catch (error) {
     if (
       error.message.includes('Unknown request') ||
@@ -26,22 +25,10 @@ async function fetchRequestDetails(requestId) {
   }
 }
 
-// TODO: I don't understand why the request ref isn't reactive and/or v-model
-// can't be set to requests.value[route.params.requestId] directly. So instead,
-// we need this watch
-watch(
-  () => requests.value[route.params.requestId],
-  (req) => {
-    request.value = req
-  }
-)
-
-const hasRequest = computed(() => {
-  return request.value !== undefined
-})
+const request = computed(() => requests.value[route.params.requestId])
 
 function watchRequestId() {
-  watch(() => route.params.requestId, fetchRequestDetails, { immediate: true })
+  watch(() => route.params.requestId, fetchRequest, { immediate: true })
 }
 
 if (fetched.value) {
@@ -55,7 +42,7 @@ if (fetched.value) {
   <div>
     <SkeletonLoading v-if="loading" type="image" />
     <StorageRequest
-      v-else-if="hasRequest"
+      v-else
       :requestId="route.params.requestId"
       v-model="request"
       :enableModeration="route.query.enableModeration === 'true'"
