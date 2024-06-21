@@ -46,6 +46,7 @@ export const useRequestsStore = defineStore(
     // const requestFinishedEvents = ref([]) // {blockNumber, requestId}
     const loading = ref(false)
     const loadingRecent = ref(false)
+    const loadingRequestStates = ref(false)
     const fetched = ref(false) // indicates if past events were fetched
     const blocks = ref({})
     // const request = computed(() => count.value * 2)
@@ -147,6 +148,25 @@ export const useRequestsStore = defineStore(
       } catch (error) {
         console.error(`failed to load past contract events: ${error.message}`)
         return []
+      }
+    }
+
+    async function refetchRequestStates() {
+      async function refetchRequestState(requestId) {
+        requests.value[requestId].state = await getRequestState(requestId)
+      }
+      // array of asynchronously-executed Promises, each requesting a request
+      // state
+      loadingRequestStates.value = true
+      try {
+        const fetches = Object.entries(requests.value).map(([requestId, request]) =>
+          refetchRequestState(requestId)
+        )
+        await Promise.all(fetches)
+      } catch (e) {
+        console.error(`failure requesting latest request states:`, e)
+      } finally {
+        loadingRequestStates.value = false
       }
     }
 
@@ -379,10 +399,12 @@ export const useRequestsStore = defineStore(
       // requestFailedEvents,
       // requestFinishedEvents,
       fetchPastRequests,
+      refetchRequestStates,
       fetchRequestDetails,
       listenForNewEvents,
       loading,
       loadingRecent,
+      loadingRequestStates,
       fetched
     }
   },

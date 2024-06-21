@@ -14,7 +14,7 @@ import { storeToRefs } from 'pinia'
 const alerts = ref([])
 const id = ref(0)
 const requestsStore = useRequestsStore()
-const { loadingRecent } = storeToRefs(requestsStore)
+const { loadingRecent, loadingRequestStates } = storeToRefs(requestsStore)
 
 function addAlert(type, event, state) {
   alerts.value.push({
@@ -39,79 +39,79 @@ function addSlotAlert(type, event, state) {
   })
 }
 
-onBeforeMount(async () => {})
+function onStorageRequested(blockNumber, requestId, state) {
+  alerts.value.push({
+    type: 'info',
+    event: 'StorageRequested',
+    blockNumber,
+    requestId,
+    state
+  })
+}
+function onRequestFulfilled(blockNumber, requestId) {
+  alerts.value.push({
+    type: 'success',
+    event: 'RequestStarted',
+    blockNumber,
+    requestId,
+    state: 'Fulfilled'
+  })
+}
+function onRequestCancelled(blockNumber, requestId) {
+  alerts.value.push({
+    type: 'danger',
+    event: 'RequestCancelled',
+    blockNumber,
+    requestId,
+    state: 'Cancelled'
+  })
+}
+function onRequestFailed(blockNumber, requestId) {
+  alerts.value.push({
+    type: 'danger',
+    event: 'RequestFailed',
+    blockNumber,
+    requestId,
+    state: 'Failed'
+  })
+}
+function onRequestFinished(blockNumber, requestId) {
+  alerts.value.push({
+    type: 'info',
+    event: 'RequestFinished',
+    blockNumber,
+    requestId,
+    state: 'Finished'
+  })
+}
+function onSlotFreed(blockNumber, requestId, slotIdx) {
+  alerts.value.push({
+    type: 'warning',
+    event: 'SlotFreed',
+    blockNumber,
+    requestId,
+    slotIdx,
+    state: 'Freed'
+  })
+}
+function onSlotFilled(blockNumber, requestId, slotIdx) {
+  alerts.value.push({
+    type: 'info',
+    event: 'SlotFilled',
+    blockNumber,
+    requestId,
+    slotIdx,
+    state: 'Filled'
+  })
+}
 
-onMounted(async () => {
-  await requestsStore.fetchPastRequests()
+onMounted(() => {
   initDrawers()
   initDismisses()
+  requestsStore.refetchRequestStates()
+  requestsStore.fetchPastRequests()
 
-  function onStorageRequested(blockNumber, requestId, state) {
-    alerts.value.push({
-      type: 'info',
-      event: 'StorageRequested',
-      blockNumber,
-      requestId,
-      state
-    })
-  }
-  function onRequestFulfilled(blockNumber, requestId) {
-    alerts.value.push({
-      type: 'success',
-      event: 'RequestStarted',
-      blockNumber,
-      requestId,
-      state: 'Fulfilled'
-    })
-  }
-  function onRequestCancelled(blockNumber, requestId) {
-    alerts.value.push({
-      type: 'danger',
-      event: 'RequestCancelled',
-      blockNumber,
-      requestId,
-      state: 'Cancelled'
-    })
-  }
-  function onRequestFailed(blockNumber, requestId) {
-    alerts.value.push({
-      type: 'danger',
-      event: 'RequestFailed',
-      blockNumber,
-      requestId,
-      state: 'Failed'
-    })
-  }
-  function onRequestFinished(blockNumber, requestId) {
-    alerts.value.push({
-      type: 'info',
-      event: 'RequestFinished',
-      blockNumber,
-      requestId,
-      state: 'Finished'
-    })
-  }
-  function onSlotFreed(blockNumber, requestId, slotIdx) {
-    alerts.value.push({
-      type: 'warning',
-      event: 'SlotFreed',
-      blockNumber,
-      requestId,
-      slotIdx,
-      state: 'Freed'
-    })
-  }
-  function onSlotFilled(blockNumber, requestId, slotIdx) {
-    alerts.value.push({
-      type: 'info',
-      event: 'SlotFilled',
-      blockNumber,
-      requestId,
-      slotIdx,
-      state: 'Filled'
-    })
-  }
-  await requestsStore.listenForNewEvents(
+  requestsStore.listenForNewEvents(
     onStorageRequested,
     onRequestFulfilled,
     onRequestCancelled,
@@ -188,11 +188,16 @@ onUnmounted(() => {
       <Balance />
       <BlockNumber />
     </footer>
-    <ToastNotification
-      class="fixed bottom-5 right-5"
-      v-if="loadingRecent"
-      text="Loading recent storage requests..."
-    ></ToastNotification>
+    <div id="toast-container" class="fixed bottom-5 right-5 flex flex-col space-y-2">
+      <ToastNotification
+        v-if="loadingRecent"
+        text="Loading recent storage requests..."
+      ></ToastNotification>
+      <ToastNotification
+        v-if="loadingRequestStates"
+        text="Loading latest request states..."
+      ></ToastNotification>
+    </div>
   </div>
 </template>
 
