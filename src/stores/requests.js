@@ -422,7 +422,8 @@ export const useRequestsStore = defineStore(
           // TODO: deserialize bigints properly
           return JSON.parse(serialized)
         }
-      }
+      },
+      paths: ['blocks', 'requests', 'fetched']
     }
   }
 )
