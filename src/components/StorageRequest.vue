@@ -1,8 +1,7 @@
 <script setup>
 import { onMounted, onUnmounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { initTooltips } from 'flowbite'
-import { storeToRefs } from 'pinia'
-import { useRequestsStore } from '@/stores/requests'
 import { getStateColour, moderatedState, price } from '@/utils/requests'
 import { autoPluralize } from '@/utils/strings'
 
@@ -13,8 +12,9 @@ import ShortenValue from '@/components/ShortenValue.vue'
 import Slots from './Slots.vue'
 import SkeletonLoading from './SkeletonLoading.vue'
 
+const router = useRouter()
 const request = defineModel()
-const props = defineProps({
+defineProps({
   requestId: {
     type: String,
     required: true
@@ -54,7 +54,7 @@ const stateColour = computed(() => getStateColour(request.value.state))
     <div class="py-4 px-4 ml-4 max-w-2xl flex-1">
       <div
         v-if="enableModeration === true"
-        class="mb-4 p-5 w-full border border-gray-300 rounded-lg b-1 bg-gray-100"
+        class="flex flex-col space-between mb-4 p-5 w-full border border-gray-300 rounded-lg b-1 bg-gray-100"
       >
         <label for="moderation" class="block mb-2 text-lg font-medium text-gray-900 dark:text-white"
           >Moderation station</label
@@ -78,6 +78,13 @@ const stateColour = computed(() => getStateColour(request.value.state))
             size="lg"
           ></StateIndicator>
         </div>
+        <a
+          :href="router.resolve({ path: `/request/${requestId}` }).href"
+          target="_blank"
+          class="mt-4 font-medium text-blue-600 dark:text-blue-500 hover:underline"
+          @click.stop
+          >Preview</a
+        >
       </div>
       <div class="flex justify-between items-center mb-2">
         <h2 class="text-xl font-semibold leading-none text-gray-900 md:text-2xl dark:text-white">

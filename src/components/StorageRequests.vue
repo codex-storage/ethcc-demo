@@ -179,6 +179,15 @@ onMounted(() => {
             </td>
             <td class="px-6 py-4">
               <a
+                v-if="enableModeration"
+                :href="router.resolve({ path: `/request/${requestId}` }).href"
+                target="_blank"
+                class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                @click.stop
+                >Preview</a
+              >
+              <a
+                v-else
                 href="#"
                 type="button"
                 class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
