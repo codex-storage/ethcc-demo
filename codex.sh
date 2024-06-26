@@ -9,7 +9,7 @@ ${CODEX_PATH}/build/codex \
   --bootstrap-node=spr:CiUIAhIhAgybmRwboqDdUJjeZrzh43sn5mp8jt6ENIb08tLn4x01EgIDARo8CicAJQgCEiECDJuZHBuioN1QmN5mvOHjeyfmanyO3oQ0hvTy0ufjHTUQh4ifsAYaCwoJBI_0zSiRAnVsKkcwRQIhAJCb_z0E3RsnQrEePdJzMSQrmn_ooHv6mbw1DOh5IbVNAiBbBJrWR8eBV6ftzMd6ofa5khNA2h88OBhMqHCIzSjCeA \
   --bootstrap-node=spr:CiUIAhIhAntGLadpfuBCD9XXfiN_43-V3L5VWgFCXxg4a8uhDdnYEgIDARo8CicAJQgCEiECe0Ytp2l-4EIP1dd-I3_jf5XcvlVaAUJfGDhry6EN2dgQsIufsAYaCwoJBNEmoCiRAnV2KkYwRAIgXO3bzd5VF8jLZG8r7dcLJ_FnQBYp1BcxrOvovEa40acCIDhQ14eJRoPwJ6GKgqOkXdaFAsoszl-HIRzYcXKeb7D9 \
   --data-dir=./codex-data \
-  --log-level='INFO;TRACE:marketplace,node,statemachine,erasure,storestream' \
+  --log-level='INFO;TRACE:marketplace,node,statemachine,erasure,storestream,blockstore' \
   --api-port=8080 \
   --api-bindaddr=0.0.0.0 \
   --api-cors-origin='*' \
@@ -20,7 +20,7 @@ ${CODEX_PATH}/build/codex \
   persistence \
   --eth-private-key=./codex-setup/eth.key \
   --eth-provider=https://rpc.testnet.codex.storage \
-  --marketplace-address=0x4cBDfab37baB0AA3AC69A7b12C4396907dfF5227 \
+  --marketplace-address=0x9C88D67c7C745D2F0A4E411c18A6a22c15b37EaA \
   prover \
   --circom-r1cs=./codex-setup/circuits/proof_main.r1cs \
   --circom-wasm=./codex-setup/circuits/proof_main.wasm \
