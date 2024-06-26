@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, onMounted, ref, onUnmounted, inject } from 'vue'
+import { onMounted, ref, onUnmounted, inject } from 'vue'
 import { useRequestsStore } from '@/stores/requests'
 import { RouterView } from 'vue-router'
 import Balance from '@/components/Balance.vue'
@@ -10,11 +10,14 @@ import ContractEventAlerts from '@/components/ContractEventAlerts.vue'
 import { initDrawers, initDismisses } from 'flowbite'
 import NavBreadcrumb from './components/NavBreadcrumb.vue'
 import { storeToRefs } from 'pinia'
+import NetworkConnectionState from './components/NetworkConnectionState.vue'
 
 const alerts = ref([])
 const id = ref(0)
 const requestsStore = useRequestsStore()
 const { loadingRecent, loadingRequestStates } = storeToRefs(requestsStore)
+const codexApi = inject('codexApi')
+const ethProvider = inject('ethProvider')
 
 function addAlert(type, event, state) {
   alerts.value.push({
@@ -132,6 +135,24 @@ function handleStorageEvent(event) {
   }
 }
 
+async function detectRunningCodexNode() {
+  try {
+    let response = await codexApi.spr()
+    return response.ok
+  } catch (e) {
+    return false
+  }
+}
+
+async function detectRunningCodexDevnet() {
+  try {
+    await ethProvider.getNetwork.bind(ethProvider)()
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
 onUnmounted(() => {
   window.removeEventListener('storage', handleStorageEvent)
 })
@@ -184,9 +205,21 @@ onUnmounted(() => {
       <NavBreadcrumb class="mb-4"></NavBreadcrumb>
       <RouterView />
     </main>
-    <footer class="w-full sticky bottom-0 text-center border-t p-4 mt-4 flex-none">
-      <Balance />
-      <BlockNumber />
+    <footer class="w-full sticky bottom-0 border-t p-4 mt-4 flex-none flex justify-between">
+      <div class="flex flex-col  space-y-1">
+        <Balance />
+        <BlockNumber />
+      </div>
+      <div class="flex flex-col space-y-3">
+        <NetworkConnectionState
+          :connectionTest="detectRunningCodexNode"
+          text="Codex node"
+        ></NetworkConnectionState>
+        <NetworkConnectionState
+          :connectionTest="detectRunningCodexDevnet"
+          text="Codex devnet"
+        ></NetworkConnectionState>
+      </div>
     </footer>
     <div id="toast-container" class="fixed bottom-5 right-5 flex flex-col space-y-2">
       <ToastNotification

@@ -3,7 +3,8 @@ export default {
     const codexApi = {
       info: () => fetch(`${codexRestUrl}/debug/info`),
       download: (cid) => fetch(`${codexRestUrl}/data/${cid}/network`),
-      downloadLocal: (cid) => fetch(`${codexRestUrl}/data/${cid}`)
+      downloadLocal: (cid) => fetch(`${codexRestUrl}/data/${cid}`),
+      spr: () => fetch(`${codexRestUrl}/spr`)
     }
 
     app.provide('myAddress', myAddress)

@@ -1,6 +1,6 @@
 <script setup>
 import { inject, ref, onMounted } from 'vue'
-import {formatEther} from 'ethers'
+import { formatEther } from 'ethers'
 
 const token = inject('token')
 const myAddress = inject('myAddress')
@@ -16,5 +16,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>My balance: {{ formatEther(balance) }} TST</div>
+  <div>
+    <img
+      src="../assets/logo.svg"
+      class="h-4 mr-2 hidden dark:inline-block"
+      alt="Codex
+    Logo"
+    />
+    <img
+      src="../assets/logo-black.svg"
+      class="h-4 mr-2 inline-block align-middle dark:hidden"
+      alt="Codex Logo"
+    />
+    <span class="inline-block align-middle">{{ formatEther(balance) }} TST</span>
+  </div>
 </template>
