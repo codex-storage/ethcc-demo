@@ -1,7 +1,9 @@
 <script setup>
-import { onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import AlertWithContent from '@/components/alerts/AlertWithContent.vue'
 
+const router = useRouter()
+const route = useRoute()
 const alerts = defineModel()
 </script>
 
@@ -14,7 +16,7 @@ const alerts = defineModel()
       :id="event + blockNumber + requestId"
       :title="event"
       :type="type"
-      :btn-more-url="`/request/${requestId}`"
+      :btn-more-url="router.resolve({ path: `/request/${requestId}`, query: route.query }).href"
       ><p>request {{ requestId }} at block {{ blockNumber }}</p>
       <p v-if="slotIdx">Slot index: {{ slotIdx }}</p>
       <p>State: {{ state }}</p></AlertWithContent
