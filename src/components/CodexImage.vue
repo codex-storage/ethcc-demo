@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref, onMounted, computed } from 'vue'
+import { inject, ref, onMounted, computed, watch } from 'vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 
 const codexApi = inject('codexApi')
@@ -31,16 +31,16 @@ const props = defineProps({
 const hidden = computed(() => props.cid === undefined)
 const blurred = computed(() => ['pending', 'banned'].includes(props.moderated))
 
-onMounted(async () => {
+async function fetchImage(cid) {
   if (hidden.value) {
     return
   }
   loading.value = true
 
   try {
-    let res = await codexApi.downloadLocal(props.cid)
+    let res = await codexApi.downloadLocal(cid)
     if (res.status === 404 && !props.localOnly) {
-      res = await codexApi.download(props.cid)
+      res = await codexApi.download(cid)
     }
     if (!res.ok) {
       throw new Error(`${res.status} ${res.statusText}`)
@@ -56,7 +56,10 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
+
+watch(() => props.cid, fetchImage, {immediate: true})
+
 </script>
 
 <template>
