@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, computed } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { initTooltips } from 'flowbite'
 import { getStateColour, moderatedState, price } from '@/utils/requests'
@@ -48,7 +48,6 @@ const stateColour = computed(() => getStateColour(request.value.state))
     <CodexImage
       class="flex-initial mx-auto my-4 min-w-sm max-w-md w-full rounded"
       :cid="request.content.cid"
-      :local-only="!['New', 'Fulfilled'].includes(request.state)"
       :moderated="enableModeration ? 'approved' : request.moderated"
     ></CodexImage>
     <div class="py-4 px-4 ml-4 max-w-2xl flex-1">
