@@ -195,13 +195,10 @@ export const useRequestsStore = defineStore(
 
     async function fetchRequestDetails(requestId) {
       try {
-        // const reqExisting = requests.value[requestId] || {}
-        if (!requests.value[requestId]) {
-          requests.value[requestId] = {}
+        let request = requests.value[requestId] || {}
+        if (requestId in requests.value) {
+          requests.value[requestId].detailsLoading = true
         }
-        requests.value[requestId].detailsLoading = true
-
-        let request = requests.value[requestId]
         // fetch request details if not previously fetched
         if (request?.detailsFetched !== true) {
           console.log('request', requestId, ' details already fetched')
@@ -225,10 +222,11 @@ export const useRequestsStore = defineStore(
           detailsLoading: false
         }
       } catch (error) {
-        if (error.message.includes('Unknown request')) {
-          delete requests.value[requestId]
-        } else {
-          console.error(`failed to load slots for request ${requestId}: ${error}`)
+        if (
+          !error.message.includes('Unknown request') &&
+          !error.message.includes('invalid BytesLike value')
+        ) {
+          console.error(`failed to fetch details for request ${requestId}: ${error}`)
         }
         throw error
       }
