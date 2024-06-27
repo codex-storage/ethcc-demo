@@ -13,7 +13,7 @@ const alerts = defineModel()
     :key="event + blockNumber + requestId"
   >
     <AlertWithContent
-      :id="event + blockNumber + requestId"
+      :id="event + blockNumber + requestId + slotIdx"
       :title="event"
       :type="type"
       :btn-more-url="router.resolve({ path: `/request/${requestId}`, query: route.query }).href"
