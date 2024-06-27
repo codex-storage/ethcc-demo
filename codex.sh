@@ -16,7 +16,7 @@ ${CODEX_PATH}/build/codex \
   --metrics=true \
   --listen-addrs=/ip4/0.0.0.0/tcp/8070 \
   --disc-port=8090 \
-  --nat=$(curl https://ip.codex.storage) \
+  --nat=$(dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | awk -F'"' '{ print $2}') \
   persistence \
   --eth-private-key=./codex-setup/eth.key \
   --eth-provider=https://rpc.testnet.codex.storage \
