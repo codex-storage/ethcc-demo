@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { slotId } from '../utils/ids'
 import { arrayToObject, requestState } from '@/utils/requests'
 import { slotState } from '@/utils/slots'
+import serializer from './serializer'
 
 class RequestNotFoundError extends Error {
   constructor(requestId, ...params) {
@@ -88,14 +89,19 @@ export const useRequestsStore = defineStore(
       let start = Date.now()
       let slots = []
       for (let slotIdx = 0; slotIdx < numSlots; slotIdx++) {
-        let id = slotId(requestId, slotIdx)
-        const startSlotState = Date.now()
-        let state = await getSlotState(id)
-        console.log(`fetched slot state in ${(Date.now() - startSlotState) / 1000}s`)
-        const startGetHost = Date.now()
-        let provider = await marketplace.getHost(id)
-        console.log(`fetched slot provider in ${(Date.now() - startGetHost) / 1000}s`)
-        slots.push({ slotId: id, slotIdx, state, provider })
+        try {
+          let id = slotId(requestId, slotIdx)
+          const startSlotState = Date.now()
+          let state = await getSlotState(id)
+          console.log(`fetched slot state in ${(Date.now() - startSlotState) / 1000}s`)
+          const startGetHost = Date.now()
+          let provider = await marketplace.getHost(id)
+          console.log(`fetched slot provider in ${(Date.now() - startGetHost) / 1000}s`)
+          slots.push({ slotId: id, slotIdx, state, provider })
+        } catch (e) {
+          console.error('error getting slot details', e)
+          continue
+        }
       }
       console.log(`fetched ${numSlots} slots in ${(Date.now() - start) / 1000}s`)
       return slots
@@ -111,15 +117,38 @@ export const useRequestsStore = defineStore(
       }
     }
 
-    async function addRequest(requestId, blockHash) {
+    async function addRequest(requestId, ask, blockHash) {
       let state = await getRequestState(requestId)
       let { timestamp } = await getBlock(blockHash)
       let reqExisting = requests.value[requestId] || {} // just in case it already exists
+
+      let requestFinishedId = null
+      if (['Fulfilled', 'New'].includes(state)) {
+        let durationBigInt = ask[2]
+        try {
+          // set request state to finished at the end of the request -- there's no
+          // other way to know when a request finishes
+          let duration = Number(durationBigInt)
+          let endsAt = (timestamp + duration) * 1000 // time storage was requested plus total duration, in ms
+          let msFromNow = endsAt - Date.now() // time remaining until finish, in ms
+          requestFinishedId = waitForRequestFinished(
+            requestId,
+            msFromNow,
+            onRequestFinishedCallback
+          )
+        } catch (e) {
+          console.error(
+            `Failed to set timeout for RequestFinished event for request ${requestId}. There will be no alert for this event.`,
+            e
+          )
+        }
+      }
+
       let request = {
         ...reqExisting,
         state,
         requestedAt: timestamp,
-        requestFinishedId: null,
+        requestFinishedId,
         detailsFetched: false,
         moderated: 'pending'
       }
@@ -130,7 +159,7 @@ export const useRequestsStore = defineStore(
     async function handleStorageRequestEvent(event) {
       let { requestId, ask, expiry } = event.args
       let { blockHash, blockNumber } = event
-      await addRequest(requestId, blockHash)
+      await addRequest(requestId, ask, blockHash)
     }
 
     // Returns an array of Promises, where each Promise represents the fetching
@@ -204,6 +233,8 @@ export const useRequestsStore = defineStore(
           console.log('request', requestId, ' details already fetched')
           request = arrayToObject(await marketplace.getRequest(requestId))
         }
+        // always fetch state
+        const state = await getRequestState(requestId)
 
         // always fetch slots
         console.log('fetching slots for request', requestId)
@@ -217,6 +248,7 @@ export const useRequestsStore = defineStore(
         requests.value[requestId] = {
           ...requests.value[requestId], // state, requestedAt, requestFinishedId (null)
           ...request,
+          state,
           slotsLoading: true,
           detailsFetched: true,
           detailsLoading: false
@@ -259,14 +291,18 @@ export const useRequestsStore = defineStore(
         if (slot.slotIdx == slotIdx) {
           slot.state = newState
         }
+        return slot
       })
       requests.value[requestId] = { slots, ...rest }
     }
 
-    function waitForRequestFinished(requestId, duration, onRequestFinished) {
+    function waitForRequestFinished(requestId, msFromNow, onRequestFinished) {
       return setTimeout(async () => {
         try {
-          updateRequestState(requestId, 'Finished')
+          // the state may actually have been cancelled, but RequestCancelled
+          // may not have fired yet, so get the updated state
+          const state = await getRequestState(requestId)
+          updateRequestState(requestId, state)
           updateRequestFinishedId(requestId, null)
         } catch (error) {
           if (error instanceof RequestNotFoundError) {
@@ -277,7 +313,7 @@ export const useRequestsStore = defineStore(
           let blockNumber = await ethProvider.getBlockNumber()
           onRequestFinished(blockNumber, requestId)
         }
-      }, duration)
+      }, msFromNow)
     }
 
     function cancelWaitForRequestFinished(requestId) {
@@ -290,6 +326,7 @@ export const useRequestsStore = defineStore(
       }
     }
 
+    let onRequestFinishedCallback
     async function listenForNewEvents(
       onStorageRequested,
       onRequestFulfilled,
@@ -299,9 +336,11 @@ export const useRequestsStore = defineStore(
       onSlotFreed,
       onSlotFilled
     ) {
+      onRequestFinishedCallback = onRequestFinished
+
       marketplace.on(StorageRequested, async (requestId, ask, expiry, event) => {
         let { blockNumber, blockHash } = event.log
-        const request = addRequest(requestId, blockHash)
+        const request = addRequest(requestId, ask, blockHash)
 
         // callback
         if (onStorageRequested) {
@@ -310,15 +349,13 @@ export const useRequestsStore = defineStore(
       })
 
       marketplace.on(RequestFulfilled, async (requestId, event) => {
-        let requestOnChain = await marketplace.getRequest(requestId)
-        let ask = requestOnChain[1]
-        let duration = ask[1]
-        // set request state to finished at the end of the request -- there's no
-        // other way to know when a request finishes
-        console.log('request ', requestOnChain)
-        let requestFinishedId = waitForRequestFinished(requestId, duration, onRequestFinished)
-        updateRequestState(requestId, 'Fulfilled')
-        updateRequestFinishedId(requestId, requestFinishedId)
+        try {
+          updateRequestState(requestId, 'Fulfilled')
+        } catch (error) {
+          if (error instanceof RequestNotFoundError) {
+            await fetchRequestDetails(requestId)
+          }
+        }
 
         let { blockNumber } = event.log
         if (onRequestFulfilled) {
@@ -328,6 +365,7 @@ export const useRequestsStore = defineStore(
       marketplace.on(RequestCancelled, async (requestId, event) => {
         try {
           updateRequestState(requestId, 'Cancelled')
+          cancelWaitForRequestFinished(requestId)
         } catch (error) {
           if (error instanceof RequestNotFoundError) {
             await fetchRequestDetails(requestId)
@@ -356,7 +394,7 @@ export const useRequestsStore = defineStore(
       })
       marketplace.on(SlotFreed, async (requestId, slotIdx, event) => {
         try {
-          updateRequestSlotState(requestId, slotIdx, 'Freed')
+          updateRequestSlotState(requestId, slotIdx, 'Free')
         } catch (error) {
           if (error instanceof RequestNotFoundError) {
             await fetchRequestDetails(requestId)
@@ -408,20 +446,7 @@ export const useRequestsStore = defineStore(
   },
   {
     persist: {
-      serializer: {
-        serialize: (state) => {
-          try {
-            return JSON.stringify(state, (_, v) => (typeof v === 'bigint' ? v.toString() : v))
-          } catch (e) {
-            console.error(`failure serializing state`, e)
-          }
-        },
-        deserialize: (serialized) => {
-          // TODO: deserialize bigints properly
-          return JSON.parse(serialized)
-        }
-      },
-      paths: ['blocks', 'requests', 'fetched']
+      serializer
     }
   }
 )
