@@ -27,7 +27,7 @@ const props = defineProps({
     default: 'View more'
   },
   btnMoreUrl: {
-    type: String,
+    type: Object,
     required: true
   }
 })
@@ -166,7 +166,7 @@ function dismissAndRedirect(targetElId, url) {
   let targetEl = document.getElementById(targetElId)
   let dismiss = new Dismiss(targetEl)
   dismiss.hide()
-  router.push({ path: url })
+  router.push(url)
 }
 </script>
 <template>
