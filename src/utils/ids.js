@@ -30,3 +30,8 @@ export function slotId(requestId, slotIdx) {
   const encoding = coder.encode([types], [values])
   return keccak256(encoding)
 }
+
+// Generate a random string id
+export function generateUniqueId() {
+  return Math.random().toString(36).substr(2, 9);
+}

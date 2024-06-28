@@ -8,9 +8,11 @@ import ToastNotification from '@/components/toasts/ToastNotification.vue'
 import AppNav from '@/components/AppNav.vue'
 import ContractEventAlerts from '@/components/ContractEventAlerts.vue'
 import { initDrawers, initDismisses } from 'flowbite'
-import NavBreadcrumb from './components/NavBreadcrumb.vue'
+import NavBreadcrumb from '@/components/NavBreadcrumb.vue'
 import { storeToRefs } from 'pinia'
 import NetworkConnectionState from './components/NetworkConnectionState.vue'
+import serializer from '@/stores/serializer'
+import { generateUniqueId } from '@/utils/ids'
 
 const alerts = ref([])
 const id = ref(0)
@@ -108,6 +110,8 @@ function onSlotFilled(blockNumber, requestId, slotIdx) {
   })
 }
 
+window.name = generateUniqueId()
+
 onMounted(() => {
   initDrawers()
   initDismisses()
@@ -129,11 +133,31 @@ onMounted(() => {
 
 const getLocalStorageKey = inject('getLocalStorageKey')
 const localStorageKey = getLocalStorageKey(requestsStore.$id)
+const localStorageMetaKey = `${localStorageKey}_storeEventMeta`
 function handleStorageEvent(event) {
   if (event.key === localStorageKey) {
-    requestsStore.$hydrate()
+    let serialized = window.localStorage.getItem(localStorageMetaKey)
+    if (serialized) {
+      let { source, timestamp } = serializer.deserialize(serialized)
+      // prevent our own window local storage updates from hydrating (infinite
+      // loop) and prevent stale updates from hydrating
+      if (source !== window.name && timestamp > lastStoreTimestamp) {
+        requestsStore.$hydrate()
+      }
+    }
   }
 }
+let lastStoreTimestamp = 0
+requestsStore.$subscribe(
+  (_mutation, state) => {
+    lastStoreTimestamp = Date.now()
+    const storeEventMeta = {
+      source: window.name,
+      timestamp: Date.now()
+    }
+    window.localStorage.setItem(localStorageMetaKey, serializer.serialize(storeEventMeta))
+  }
+)
 
 async function detectRunningCodexNode() {
   try {
@@ -206,7 +230,7 @@ onUnmounted(() => {
       <RouterView />
     </main>
     <footer class="w-full sticky bottom-0 border-t p-4 mt-4 flex-none flex justify-between">
-      <div class="flex flex-col  space-y-1">
+      <div class="flex flex-col space-y-1">
         <Balance />
         <BlockNumber />
       </div>
