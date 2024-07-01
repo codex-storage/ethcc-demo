@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref, onMounted, computed, watch } from 'vue'
+import { inject, ref, onMounted, computed, watch, onUnmounted } from 'vue'
 import SpinnerLoading from '@/components/SpinnerLoading.vue'
 
 const codexApi = inject('codexApi')
@@ -26,10 +26,18 @@ const props = defineProps({
       // The value must match one of these strings
       return ['pending', 'approved', 'banned'].includes(value)
     }
+  },
+  timeout: {
+    type: Number,
+    default() {
+      return 5000
+    }
   }
 })
 const hidden = computed(() => props.cid === undefined)
 const blurred = computed(() => ['pending', 'banned'].includes(props.moderated))
+
+const controller = new AbortController();
 
 async function fetchImage(cid) {
   if (hidden.value) {
@@ -37,22 +45,37 @@ async function fetchImage(cid) {
   }
   loading.value = true
 
+  const timeoutSignal = AbortSignal.timeout(props.timeout);
+
   try {
-    let res = await codexApi.downloadLocal(cid)
-    if (res.status === 404 && !props.localOnly) {
-      res = await codexApi.download(cid)
+    let response
+    let options = {
+      // This will abort the fetch when either signal is aborted
+      signal: AbortSignal.any([controller.signal, timeoutSignal]),
     }
-    if (!res.ok) {
-      throw new Error(`${res.status} ${res.statusText}`)
+    if (props.localOnly) {
+      response = await codexApi.downloadLocal(cid, options)
+    } else {
+      response = await codexApi.download(cid, options)
+    }
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`)
     }
     try {
-      const blob = await res.blob()
+      const blob = await response.blob()
       imgSrc.value = URL.createObjectURL(blob)
     } catch (e) {
       error.value = `not an image (error: ${e.message})`
     }
   } catch (e) {
-    error.value = `failed to download cid data: ${e.message}`
+    if (e.name === "AbortError") {
+      console.log(`image fetch aborted for cid ${props.cid}`)
+    } else if (e.name === "TimeoutError") {
+      // Notify the user of timeout
+      console.error(`image fetch for cid ${props.cid} timed out after ${props.timeout}ms`)
+    } else {
+      error.value = `failed to download cid data: ${e.message}`
+    }
   } finally {
     loading.value = false
   }
@@ -60,6 +83,9 @@ async function fetchImage(cid) {
 
 watch(() => props.cid, fetchImage, {immediate: true})
 
+onUnmounted(() => {
+  controller.abort() // abort image fetch
+})
 </script>
 
 <template>
