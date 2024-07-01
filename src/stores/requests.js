@@ -127,8 +127,8 @@ export const useRequestsStore = defineStore(
         try {
           // set request state to finished at the end of the request -- there's no
           // other way to know when a request finishes
-          let { requestedAt, endsAt } = timestampsFor(ask, expiry, timestamp)
-          let msFromNow = endsAt - Date.now() // time remaining until finish, in ms
+          let { endsAt } = timestampsFor(ask, expiry, timestamp)
+          let msFromNow = endsAt * 1000 - Date.now() // time remaining until finish, in ms
           requestFinishedId = waitForRequestFinished(
             requestId,
             msFromNow,
@@ -338,7 +338,7 @@ export const useRequestsStore = defineStore(
 
       marketplace.on(StorageRequested, async (requestId, ask, expiry, event) => {
         let { blockNumber, blockHash } = event.log
-        const request = addRequest(requestId, ask, expiry, blockHash)
+        const request = await addRequest(requestId, ask, expiry, blockHash)
 
         // callback
         if (onStorageRequested) {
