@@ -30,14 +30,14 @@ const props = defineProps({
   timeout: {
     type: Number,
     default() {
-      return 5000
+      return 30000
     }
   }
 })
 const hidden = computed(() => props.cid === undefined)
 const blurred = computed(() => ['pending', 'banned'].includes(props.moderated))
 
-const controller = new AbortController();
+const controller = new AbortController()
 
 async function fetchImage(cid) {
   if (hidden.value) {
@@ -45,13 +45,13 @@ async function fetchImage(cid) {
   }
   loading.value = true
 
-  const timeoutSignal = AbortSignal.timeout(props.timeout);
+  const timeoutSignal = AbortSignal.timeout(props.timeout)
 
   try {
     let response
     let options = {
       // This will abort the fetch when either signal is aborted
-      signal: AbortSignal.any([controller.signal, timeoutSignal]),
+      signal: AbortSignal.any([controller.signal, timeoutSignal])
     }
     if (props.localOnly) {
       response = await codexApi.downloadLocal(cid, options)
@@ -68,11 +68,11 @@ async function fetchImage(cid) {
       error.value = `not an image (error: ${e.message})`
     }
   } catch (e) {
-    if (e.name === "AbortError") {
+    if (e.name === 'AbortError') {
       console.log(`image fetch aborted for cid ${props.cid}`)
-    } else if (e.name === "TimeoutError") {
+    } else if (e.name === 'TimeoutError') {
       // Notify the user of timeout
-      console.error(`image fetch for cid ${props.cid} timed out after ${props.timeout}ms`)
+      error.value = `image fetch for cid ${props.cid} timed out after ${props.timeout}ms`
     } else {
       error.value = `failed to download cid data: ${e.message}`
     }
@@ -81,7 +81,7 @@ async function fetchImage(cid) {
   }
 }
 
-watch(() => props.cid, fetchImage, {immediate: true})
+watch(() => props.cid, fetchImage, { immediate: true })
 
 onUnmounted(() => {
   controller.abort() // abort image fetch
