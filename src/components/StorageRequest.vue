@@ -149,7 +149,7 @@ const timestamps = computed(() => {
           <tbody>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
-                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+                class="flex items-center px-2 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
                 Expiry
               </td>
@@ -157,7 +157,7 @@ const timestamps = computed(() => {
             </tr>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
-                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+                class="flex items-center px-2 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
                 Duration
               </td>
@@ -165,7 +165,7 @@ const timestamps = computed(() => {
             </tr>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
-                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+                class="flex items-center px-2 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
                 Slot size
               </td>
@@ -173,7 +173,7 @@ const timestamps = computed(() => {
             </tr>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
-                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+                class="flex items-center px-2 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
                 Proof probability
               </td>
@@ -181,23 +181,23 @@ const timestamps = computed(() => {
             </tr>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
-                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+                class="flex items-center px-2 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
                 Reward
               </td>
               <td class="px-6 py-2 font-light">{{ request.ask.reward }} CDX</td>
             </tr>
-            <tr class="hover:bg-gray-50 dark:hover:tbg-gray-600 text-base">
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
-                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+                class="flex items-center px-2 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
                 Collateral
               </td>
               <td class="px-6 py-2 font-light">{{ request.ask.collateral }} CDX</td>
             </tr>
-            <tr class="hover:bg-gray-50 dark:hover:tbg-gray-600 text-base">
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
-                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+                class="flex items-center px-2 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
                 Slots
               </td>
@@ -205,7 +205,7 @@ const timestamps = computed(() => {
             </tr>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
-                class="flex items-center pr-1 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
+                class="flex items-center px-2 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white border-r"
               >
                 Max slot loss
               </td>
