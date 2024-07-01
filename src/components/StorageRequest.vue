@@ -2,7 +2,7 @@
 import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { initTooltips } from 'flowbite'
-import { getStateColour, moderatedState, price } from '@/utils/requests'
+import { getStateColour, moderatedState, price, timestampsFor } from '@/utils/requests'
 import { autoPluralize } from '@/utils/strings'
 
 import CodexImage from '@/components/CodexImage.vue'
@@ -41,6 +41,18 @@ const totalPrice = computed(() => price(request.value))
 const maxSlotLoss = computed(() => autoPluralize(request.value.ask.maxSlotLoss, 'slot'))
 const slots = computed(() => autoPluralize(request.value.ask.slots, 'slot'))
 const stateColour = computed(() => getStateColour(request.value.state))
+const timestamps = computed(() => {
+  let { requestedAt, endsAt, expiresAt } = timestampsFor(
+    request.value.ask,
+    request.value.expiry,
+    request.value.requestedAt
+  )
+  return {
+    requested: new Date(requestedAt * 1000),
+    expires: new Date(expiresAt * 1000),
+    ends: new Date(endsAt * 1000)
+  }
+})
 </script>
 
 <template>
@@ -53,11 +65,9 @@ const stateColour = computed(() => getStateColour(request.value.state))
     <div class="py-4 px-4 ml-4 max-w-2xl flex-1">
       <div
         v-if="enableModeration === true"
-      class="flex flex-col space-between mb-4 p-5 w-full border border-gray-300
-      rounded-lg b-1 bg-gray-100 dark:bg-gray-800"
+        class="flex flex-col space-between mb-4 p-5 w-full border border-gray-300 rounded-lg b-1 bg-gray-100 dark:bg-gray-800"
       >
-        <label for="moderation" class="block mb-2 text-lg font-medium
-        text-gray-900 dark:text-white"
+        <label for="moderation" class="block mb-2 text-lg font-medium text-gray-900 dark:text-white"
           >Moderation station</label
         >
         <div class="flex items-center justify-between space-x-4">
@@ -99,8 +109,19 @@ const stateColour = computed(() => getStateColour(request.value.state))
         {{ totalPrice }} CDX
       </p>
       <dl>
-        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
-          <RelativeTime :timestamp="new Date(request.requestedAt * 1000)"></RelativeTime>
+        <dd class="mb-4 flex justify-between font-light text-gray-500 sm:mb-5 dark:text-gray-400">
+          <div>
+            <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Requested</dt>
+            <RelativeTime :timestamp="timestamps.requested"></RelativeTime>
+          </div>
+          <div>
+            <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Expires</dt>
+            <RelativeTime :timestamp="timestamps.expires"></RelativeTime>
+          </div>
+          <div>
+            <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Ends</dt>
+            <RelativeTime :timestamp="timestamps.ends"></RelativeTime>
+          </div>
         </dd>
       </dl>
       <dl>

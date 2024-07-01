@@ -1,7 +1,7 @@
 import { ref, inject } from 'vue'
 import { defineStore } from 'pinia'
 import { slotId } from '../utils/ids'
-import { arrayToObject, requestState } from '@/utils/requests'
+import { arrayToObject, requestState, timestampsFor } from '@/utils/requests'
 import { slotState } from '@/utils/slots'
 import serializer from './serializer'
 
@@ -117,19 +117,17 @@ export const useRequestsStore = defineStore(
       }
     }
 
-    async function addRequest(requestId, ask, blockHash) {
+    async function addRequest(requestId, ask, expiry, blockHash) {
       let state = await getRequestState(requestId)
       let { timestamp } = await getBlock(blockHash)
       let reqExisting = requests.value[requestId] || {} // just in case it already exists
 
       let requestFinishedId = null
       if (['Fulfilled', 'New'].includes(state)) {
-        let durationBigInt = ask[2]
         try {
           // set request state to finished at the end of the request -- there's no
           // other way to know when a request finishes
-          let duration = Number(durationBigInt)
-          let endsAt = (timestamp + duration) * 1000 // time storage was requested plus total duration, in ms
+          let { requestedAt, endsAt } = timestampsFor(ask, expiry, timestamp)
           let msFromNow = endsAt - Date.now() // time remaining until finish, in ms
           requestFinishedId = waitForRequestFinished(
             requestId,
@@ -159,7 +157,7 @@ export const useRequestsStore = defineStore(
     async function handleStorageRequestEvent(event) {
       let { requestId, ask, expiry } = event.args
       let { blockHash, blockNumber } = event
-      await addRequest(requestId, ask, blockHash)
+      await addRequest(requestId, ask, expiry, blockHash)
     }
 
     // Returns an array of Promises, where each Promise represents the fetching
@@ -340,7 +338,7 @@ export const useRequestsStore = defineStore(
 
       marketplace.on(StorageRequested, async (requestId, ask, expiry, event) => {
         let { blockNumber, blockHash } = event.log
-        const request = addRequest(requestId, ask, blockHash)
+        const request = addRequest(requestId, ask, expiry, blockHash)
 
         // callback
         if (onStorageRequested) {

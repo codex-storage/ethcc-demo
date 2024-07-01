@@ -54,3 +54,13 @@ export const requestState = [
   'Finished', // successfully completed
   'Failed' // too many nodes have failed to provide proofs, data lost
 ]
+
+// all parameters in seconds, return values also in seconds
+export function timestampsFor(ask, expiryBigInt, requestedAt) {
+  let durationBigInt = ask.duration || ask[2]
+  let duration = Number(durationBigInt)
+  let expiry = Number(expiryBigInt)
+  let endsAt = requestedAt + duration // time storage was requested plus total duration, in ms
+  let expiresAt = requestedAt + expiry // expiry plus total duration, in ms
+  return { requestedAt, endsAt, expiresAt }
+}
