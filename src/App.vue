@@ -148,16 +148,14 @@ function handleStorageEvent(event) {
   }
 }
 let lastStoreTimestamp = 0
-requestsStore.$subscribe(
-  (_mutation, state) => {
-    lastStoreTimestamp = Date.now()
-    const storeEventMeta = {
-      source: window.name,
-      timestamp: Date.now()
-    }
-    window.localStorage.setItem(localStorageMetaKey, serializer.serialize(storeEventMeta))
+requestsStore.$subscribe((_mutation, state) => {
+  lastStoreTimestamp = Date.now()
+  const storeEventMeta = {
+    source: window.name,
+    timestamp: Date.now()
   }
-)
+  window.localStorage.setItem(localStorageMetaKey, serializer.serialize(storeEventMeta))
+})
 
 async function detectRunningCodexNode() {
   try {
@@ -183,44 +181,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <button
-    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-    type="button"
-    @click="addAlert('success', 'RequestFulfilled', 'Fulfilled')"
-  >
-    success alert
-  </button>
-  <button
-    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-    type="button"
-    @click="addAlert('warning', 'SlotFreed', 'Freed')"
-  >
-    warning alert
-  </button>
-  <button
-    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-    type="button"
-    @click="addAlert('danger', 'RequestFailed', 'Failed')"
-  >
-    danger alert
-  </button>
-  <button
-    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-    type="button"
-    @click="addAlert('info', 'RequestFinished', 'Finished')"
-  >
-    info alert
-  </button>
-  <button
-    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-    type="button"
-    @click="addSlotAlert('info', 'SlotFreed', 'Freed')"
-  >
-    info alert - Slot
-  </button>
-  <div
-    class="absolute top-0 bottom-0 left-0 right-0 flex flex-col h-full min-w-96 bg-white dark:bg-gray-900"
-  >
+  <div class="flex flex-col h-full min-w-96 bg-white dark:bg-gray-900">
     <header class="sticky top-0 z-10 w-full text-center border-b p-4 flex-none">
       <AppNav />
     </header>

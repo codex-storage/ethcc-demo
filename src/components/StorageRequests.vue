@@ -130,9 +130,12 @@ onMounted(() => {
         />
       </div>
     </div>
-    <div class="shadow-md sm:rounded-lg border-t border-gray-50">
+    <div
+    class="relative overflow-x-auto overflow-y-hidden max-h-screen shadow-md
+    sm:rounded-lg border-t border-gray-50 h-full"
+    >
       <table
-        class="w-full relative text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+        class="w-full relative text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 rounded-lg"
       >
         <thead
           class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
@@ -148,7 +151,7 @@ onMounted(() => {
           <tr
             v-for="([requestId, { requestedAt, moderated, state }], idx) in requestsOrdered"
             :key="{ requestId }"
-            class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600"
+            class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 dark:bg-gray-800"
             @click="router.push({ path: `/request/${requestId}`, query: { enableModeration } })"
           >
             <th
