@@ -91,7 +91,12 @@ onUnmounted(() => {
 <template>
   <div v-if="!hidden" class="text-center">
     <SpinnerLoading v-if="loading" />
-    <div v-else-if="error" v-bind="$attrs" class="dark:bg-orange-700 dark:text-orange-200">
+    <div
+      v-else-if="error"
+      v-bind="$attrs"
+      class="dark:bg-orange-700 dark:text-orange-200"
+      :title="error"
+    >
       <svg
         class="text-red-500 fill-red-100 dark:text-white"
         aria-hidden="true"
