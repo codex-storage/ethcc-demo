@@ -51,7 +51,11 @@ async function fetchImage(cid) {
     let response
     let options = {
       // This will abort the fetch when either signal is aborted
-      signal: AbortSignal.any([controller.signal, timeoutSignal])
+      signal: AbortSignal.any([controller.signal, timeoutSignal]),
+      // The browser looks for a matching request in its HTTP cache.
+      // If there is a match, fresh or stale, it will be returned from the cache.
+      // If there is no match, the browser will make a normal request, and will update the cache with the downloaded resource.
+      cache: 'force-cache'
     }
     if (props.localOnly) {
       response = await codexApi.downloadLocal(cid, options)
