@@ -13,102 +13,14 @@ import { storeToRefs } from 'pinia'
 import NetworkConnectionState from './components/NetworkConnectionState.vue'
 import serializer from '@/stores/serializer'
 import { generateUniqueId } from '@/utils/ids'
+import { useEventsStore } from './stores/events'
 
-const alerts = ref([])
-const id = ref(0)
+const eventsStore = useEventsStore()
 const requestsStore = useRequestsStore()
 const { loadingRecent, loadingRequestStates } = storeToRefs(requestsStore)
+const { events } = storeToRefs(eventsStore)
 const codexApi = inject('codexApi')
 const ethProvider = inject('ethProvider')
-
-function addAlert(type, event, state) {
-  alerts.value.push({
-    id: event + '123456' + (1234567890 + ++id.value),
-    type,
-    event,
-    blockNumber: 123456,
-    requestId: '0x1a93c8ea68a45dadc599f38858b3fdcb3c442aea0f6180c20e3f08614c251041',
-    state
-  })
-}
-
-function addSlotAlert(type, event, state) {
-  alerts.value.push({
-    id: event + '123456' + (1234567890 + ++id.value),
-    type,
-    event,
-    blockNumber: 123456,
-    requestId: '0x0d08d8fa3df9d79f1c57a34ebc6a8050ae91fca2c0d6f7191470cbbf38a048bd',
-    slotIdx: 1,
-    state
-  })
-}
-
-function onStorageRequested(blockNumber, requestId, state) {
-  alerts.value.push({
-    type: 'info',
-    event: 'StorageRequested',
-    blockNumber,
-    requestId,
-    state
-  })
-}
-function onRequestFulfilled(blockNumber, requestId) {
-  alerts.value.push({
-    type: 'success',
-    event: 'RequestStarted',
-    blockNumber,
-    requestId,
-    state: 'Fulfilled'
-  })
-}
-function onRequestCancelled(blockNumber, requestId) {
-  alerts.value.push({
-    type: 'danger',
-    event: 'RequestCancelled',
-    blockNumber,
-    requestId,
-    state: 'Cancelled'
-  })
-}
-function onRequestFailed(blockNumber, requestId) {
-  alerts.value.push({
-    type: 'danger',
-    event: 'RequestFailed',
-    blockNumber,
-    requestId,
-    state: 'Failed'
-  })
-}
-function onRequestFinished(blockNumber, requestId) {
-  alerts.value.push({
-    type: 'info',
-    event: 'RequestFinished',
-    blockNumber,
-    requestId,
-    state: 'Finished'
-  })
-}
-function onSlotFreed(blockNumber, requestId, slotIdx) {
-  alerts.value.push({
-    type: 'warning',
-    event: 'SlotFreed',
-    blockNumber,
-    requestId,
-    slotIdx,
-    state: 'Freed'
-  })
-}
-function onSlotFilled(blockNumber, requestId, slotIdx) {
-  alerts.value.push({
-    type: 'info',
-    event: 'SlotFilled',
-    blockNumber,
-    requestId,
-    slotIdx,
-    state: 'Filled'
-  })
-}
 
 window.name = generateUniqueId()
 
@@ -117,16 +29,7 @@ onMounted(() => {
   initDismisses()
   requestsStore.refetchRequestStates()
   requestsStore.fetchPastRequests()
-
-  requestsStore.listenForNewEvents(
-    onStorageRequested,
-    onRequestFulfilled,
-    onRequestCancelled,
-    onRequestFailed,
-    onRequestFinished,
-    onSlotFreed,
-    onSlotFilled
-  )
+  eventsStore.listenForNewEvents()
 
   window.addEventListener('storage', handleStorageEvent)
 })
@@ -186,7 +89,7 @@ onUnmounted(() => {
       <AppNav />
     </header>
     <main class="grow flex flex-col mx-auto max-w-screen-xl w-full p-4">
-      <ContractEventAlerts v-model="alerts"></ContractEventAlerts>
+      <ContractEventAlerts v-model="events"></ContractEventAlerts>
       <NavBreadcrumb class="mb-4"></NavBreadcrumb>
       <RouterView />
     </main>
@@ -219,7 +122,10 @@ onUnmounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style>
+body {
+  @apply bg-white dark:bg-gray-900;
+}
 header,
 footer,
 main {

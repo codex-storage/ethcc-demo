@@ -40,7 +40,9 @@ onMounted(() => {
     (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
   ) {
     themeToggleLightIcon.classList.remove('hidden')
+    document.documentElement.classList.add('dark')
   } else {
+    document.documentElement.classList.remove('dark')
     themeToggleDarkIcon.classList.remove('hidden')
   }
 
@@ -51,25 +53,12 @@ onMounted(() => {
     themeToggleDarkIcon.classList.toggle('hidden')
     themeToggleLightIcon.classList.toggle('hidden')
 
-    // if set via local storage previously
-    if (localStorage.getItem('color-theme')) {
-      if (localStorage.getItem('color-theme') === 'light') {
-        document.documentElement.classList.add('dark')
-        localStorage.setItem('color-theme', 'dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-        localStorage.setItem('color-theme', 'light')
-      }
-
-      // if NOT set via local storage previously
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark')
+      localStorage.setItem('color-theme', 'light')
     } else {
-      if (document.documentElement.classList.contains('dark')) {
-        document.documentElement.classList.remove('dark')
-        localStorage.setItem('color-theme', 'light')
-      } else {
-        document.documentElement.classList.add('dark')
-        localStorage.setItem('color-theme', 'dark')
-      }
+      document.documentElement.classList.add('dark')
+      localStorage.setItem('color-theme', 'dark')
     }
   })
 })
@@ -77,7 +66,7 @@ onMounted(() => {
 
 <template>
   <nav class="mx-auto max-w-screen-xl flex flex-wrap items-center justify-between">
-    <RouterLink to="/" class="flex items-center relative rtl:space-x-reverse">
+    <RouterLink to="/" class="logo flex items-center relative rtl:space-x-reverse">
       <img src="../assets/logo.svg" class="h-8 hidden dark:inline" alt="Codex Logo" />
       <img src="../assets/logo-black.svg" class="h-8 inline dark:hidden" alt="Codex Logo" />
       <span class="self-center ml-3 text-2xl font-semibold whitespace-nowrap dark:text-white"
@@ -163,6 +152,7 @@ onMounted(() => {
             <RouterLink
               to="/moderate"
               class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              @click="drawer.hide()"
             >
               <svg
                 class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -186,6 +176,7 @@ onMounted(() => {
               href="https://github.com/codex-storage/ethcc-demo"
               target="_blank"
               class="flex text-left items-center text-gray-900 p-2 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              @click="drawer.hide()"
             >
               <svg
                 class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -257,7 +248,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-nav a.router-link-exact-active {
+nav a.router-link-exact-active:not(.logo) {
   @apply dark:bg-gray-700;
 }
 </style>
