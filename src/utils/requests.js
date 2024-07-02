@@ -30,12 +30,12 @@ export function price(request) {
 }
 
 export function getStateColour(state) {
-  if (state === 'New') {
+  if (state === RequestState.New) {
     return 'yellow'
-  } else if (state === 'Fulfilled') {
+  } else if (state === RequestState.Fulfilled) {
     return 'green'
-  } else if (state === 'Finished') {
-    return 'gray'
+  } else if (state === RequestState.Finished) {
+    return 'blue'
   } else {
     return 'red'
   }
@@ -47,13 +47,17 @@ export const moderatedState = {
   banned: { text: 'NSFW! 🫣', color: 'red' }
 }
 
-export const requestState = [
-  'New', // [default] waiting to fill slots
-  'Fulfilled', // all slots filled, accepting regular proofs
-  'Cancelled', // not enough slots filled before expiry
-  'Finished', // successfully completed
-  'Failed' // too many nodes have failed to provide proofs, data lost
-]
+export const RequestState = {
+  New: 'New', // [default] waiting to fill slots
+  Fulfilled: 'Fulfilled', // all slots filled, accepting regular proofs
+  Cancelled: 'Cancelled', // not enough slots filled before expiry
+  Finished: 'Finished', // successfully completed
+  Failed: 'Failed' // too many nodes have failed to provide proofs, data lost
+}
+
+export function toRequestState(idx) {
+  return Object.values(RequestState).at(idx)
+}
 
 // all parameters in seconds, return values also in seconds
 export function timestampsFor(ask, expiryBigInt, requestedAt) {
