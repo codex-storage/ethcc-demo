@@ -30,7 +30,7 @@ const props = defineProps({
   timeout: {
     type: Number,
     default() {
-      return 30000
+      return 120000
     }
   }
 })
