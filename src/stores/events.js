@@ -10,7 +10,6 @@ import serializer from './serializer'
 export const useEventsStore = defineStore(
   'events',
   () => {
-    // let fetched = false
     const marketplace = inject('marketplace')
     const requests = useRequestsStore()
     let {
@@ -22,30 +21,6 @@ export const useEventsStore = defineStore(
       SlotFreed
     } = marketplace.filters
     const events = ref([]) // {event: 'SlotFreed',blockNumber,requestId,slotIdx,state: 'Free'}
-    // const subscriptions = ref({})
-    // const request = computed(() => count.value * 2)
-
-    // onStorageRequested => add request to requests ref, along with slots
-    //                    => add to storageRequestedEvents {blockNumber, requestId}
-    //                    => add blockNumber to blockNumbers
-    // onRequestFulfilled => update requests[requestId].state with marketplace.getRequestState(requestId)
-    //                  => add to requestStartedEvents {blockNumber, requestId}
-    //                  => add blockNumber to blockNumbers
-    // onRequestCancelled => update requests[requestId].state with marketplace.getRequestState(requestId)
-    //                    => add to requestCancelledEvents {blockNumber, requestId}
-    //                    => add blockNumber to blockNumbers
-    // onRequestFailed => update requests[requestId].state with marketplace.getRequestState(requestId)
-    //                 => add to requestFailedEvents {blockNumber, requestId}
-    //                 => add blockNumber to blockNumbers
-    // onRequestFinished => update requests[requestId].state with marketplace.getRequestState(requestId)
-    //                   => add to requestFinishedEvents {blockNumber, requestId}
-    //                   => add blockNumber to blockNumbers
-    // onSlotFilled => update request.slots[slotId].state with getSlotState
-    //              => add to slotFilledEvents {blockNumber, slotId, slotIdx}
-    //              => add blockNumber to blockNumbers
-    // onSlotFreed => update slots[slotId].state with getSlotState
-    //             => add to slotFreedEvents {blockNumber, slotId, slotIdx}
-    //             => add blockNumber to blockNumbers
 
     function add({ event, blockNumber, requestId, slotIdx, state }) {
       events.value.push({ event, blockNumber, requestId, slotIdx, state })
@@ -142,7 +117,6 @@ export const useEventsStore = defineStore(
 
       await marketplace.removeAllListeners(StorageRequested)
       await marketplace.on(StorageRequested, onStorageRequested)
-      // subscriptions.value[StorageEvent.StorageRequested] = { subscribed: true }
 
       await marketplace.removeAllListeners(RequestFulfilled)
       await marketplace.on(RequestFulfilled, onRequestFulfilled)
