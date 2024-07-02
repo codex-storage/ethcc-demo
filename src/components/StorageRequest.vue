@@ -217,7 +217,7 @@ const timestamps = computed(() => {
         </table>
       </div>
 
-      <SkeletonLoading v-if="slotsLoading && !slotsFetched" type="text" />
+      <SkeletonLoading v-if="slotsLoading" type="text" />
       <Slots v-else :slots="request.slots"></Slots>
     </div>
   </div>
