@@ -289,7 +289,8 @@ export const useRequestsStore = defineStore(
           event: 'RequestFinished',
           blockNumber,
           requestId,
-          state: RequestState.Finished
+          state: RequestState.Finished,
+          timestamp: Date.now() / 1000
         })
       }, msFromNow + 1000) // add additional second to ensure state has changed
     }
@@ -308,6 +309,7 @@ export const useRequestsStore = defineStore(
       requests,
       blocks,
       add,
+      getBlock,
       fetchPastRequests,
       refetchRequestStates,
       fetchRequestDetails,

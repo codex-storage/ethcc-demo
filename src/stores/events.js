@@ -22,8 +22,16 @@ export const useEventsStore = defineStore(
     } = marketplace.filters
     const events = ref([]) // {event: 'SlotFreed',blockNumber,requestId,slotIdx,state: 'Free'}
 
-    function add({ event, blockNumber, requestId, slotIdx, state }) {
-      events.value.push({ event, blockNumber, requestId, slotIdx, state })
+    function add({ event, blockNumber, requestId, slotIdx, state, timestamp }) {
+      events.value.push({ event, blockNumber, requestId, slotIdx, state, timestamp })
+    }
+
+    function clearEvents() {
+      events.value = []
+    }
+
+    function clearEvent(idx) {
+      delete events.value[idx]
     }
 
     async function listenForNewEvents() {
@@ -35,7 +43,8 @@ export const useEventsStore = defineStore(
           event: StorageEvent.StorageRequested,
           blockNumber,
           requestId,
-          state: RequestState.New
+          state: RequestState.New,
+          timestamp: request.requestedAt
         })
       }
 
@@ -49,8 +58,9 @@ export const useEventsStore = defineStore(
           }
         }
 
-        let { blockNumber } = event.log
-        add({ event: StorageEvent.RequestFulfilled, blockNumber, requestId, state })
+        let { blockNumber, blockHash } = event.log
+        const { timestamp } = await requests.getBlock(blockHash)
+        add({ event: StorageEvent.RequestFulfilled, blockNumber, requestId, state, timestamp })
       }
 
       async function onRequestCancelled(requestId, event) {
@@ -64,8 +74,9 @@ export const useEventsStore = defineStore(
           }
         }
 
-        let { blockNumber } = event.log
-        add({ event: StorageEvent.RequestCancelled, blockNumber, requestId, state })
+        let { blockNumber, blockHash } = event.log
+        const { timestamp } = await requests.getBlock(blockHash)
+        add({ event: StorageEvent.RequestCancelled, blockNumber, requestId, state, timestamp })
       }
 
       async function onRequestFailed(requestId, event) {
@@ -79,8 +90,9 @@ export const useEventsStore = defineStore(
           }
         }
 
-        let { blockNumber } = event.log
-        add({ event: StorageEvent.RequestFailed, blockNumber, requestId, state })
+        let { blockNumber, blockHash } = event.log
+        const { timestamp } = await requests.getBlock(blockHash)
+        add({ event: StorageEvent.RequestFailed, blockNumber, requestId, state, timestamp })
       }
 
       async function onSlotFreed(requestId, slotIdx, event) {
@@ -94,8 +106,9 @@ export const useEventsStore = defineStore(
           }
         }
 
-        let { blockNumber } = event.log
-        add({ event: StorageEvent.SlotFreed, blockNumber, requestId, slotIdx, state })
+        let { blockNumber, blockHash } = event.log
+        const { timestamp } = await requests.getBlock(blockHash)
+        add({ event: StorageEvent.SlotFreed, blockNumber, requestId, slotIdx, state, timestamp })
       }
 
       async function onSlotFilled(requestId, slotIdx, event) {
@@ -111,8 +124,9 @@ export const useEventsStore = defineStore(
           }
         }
 
-        let { blockNumber } = event.log
-        add({ event: StorageEvent.SlotFilled, blockNumber, requestId, slotIdx, state })
+        let { blockNumber, blockHash } = event.log
+        const { timestamp } = await requests.getBlock(blockHash)
+        add({ event: StorageEvent.SlotFilled, blockNumber, requestId, slotIdx, state, timestamp })
       }
 
       await marketplace.removeAllListeners(StorageRequested)
@@ -136,6 +150,8 @@ export const useEventsStore = defineStore(
 
     return {
       events,
+      clearEvent,
+      clearEvents,
       listenForNewEvents,
       add
     }
