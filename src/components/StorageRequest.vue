@@ -37,29 +37,28 @@ onMounted(() => {
   initTooltips()
 })
 
-const totalPrice = computed(() => price(request.value))
-const maxSlotLoss = computed(() => autoPluralize(request.value.ask.maxSlotLoss, 'slot'))
-const slots = computed(() => autoPluralize(request.value.ask.slots, 'slot'))
+const totalPrice = computed(() => price(request.value.request))
+const maxSlotLoss = computed(() => autoPluralize(request.value.request.ask.maxSlotLoss, 'slot'))
+const slots = computed(() => autoPluralize(request.value.request.ask.slots, 'slot'))
 const stateColour = computed(() => getStateColour(request.value.state))
 const timestamps = computed(() => {
-  let { requestedAt, endsAt, expiresAt } = timestampsFor(
-    request.value.ask,
-    request.value.expiry,
-    request.value.requestedAt
-  )
+  let { requestedAt } = request.value
+  let { ask, expiry } = request.value.request
+  let { endsAt, expiresAt } = timestampsFor(ask, expiry, requestedAt)
   return {
     requested: new Date(requestedAt * 1000),
     expires: new Date(expiresAt * 1000),
     ends: new Date(endsAt * 1000)
   }
 })
+const requestDetails = computed(() => request.value.request)
 </script>
 
 <template>
   <div class="flex flex-wrap">
     <CodexImage
       class="flex-initial mx-auto my-4 min-w-sm max-w-md w-full rounded"
-      :cid="request.content.cid"
+      :cid="requestDetails.content.cid"
       :moderated="enableModeration ? 'approved' : request.moderated"
     ></CodexImage>
     <div class="py-4 px-4 ml-4 max-w-2xl flex-1">
@@ -127,19 +126,19 @@ const timestamps = computed(() => {
       <dl>
         <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Dataset CID</dt>
         <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
-          {{ request.content.cid }}
+          {{ requestDetails.content.cid }}
         </dd>
       </dl>
       <dl>
         <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Client</dt>
         <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
-          {{ request.client }}
+          {{ requestDetails.client }}
         </dd>
       </dl>
       <dl>
         <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Merkle root</dt>
         <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">
-          {{ request.content.merkleRoot }}
+          {{ requestDetails.content.merkleRoot }}
         </dd>
       </dl>
       <div class="relative overflow-x-auto overflow-y-auto max-h-screen mb-10">
@@ -153,7 +152,7 @@ const timestamps = computed(() => {
               >
                 Expiry
               </td>
-              <td class="px-6 py-2 font-light">{{ request.expiry }} seconds</td>
+              <td class="px-6 py-2 font-light">{{ requestDetails.expiry }} seconds</td>
             </tr>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
@@ -161,7 +160,7 @@ const timestamps = computed(() => {
               >
                 Duration
               </td>
-              <td class="px-6 py-2 font-light">{{ request.ask.duration }} seconds</td>
+              <td class="px-6 py-2 font-light">{{ requestDetails.ask.duration }} seconds</td>
             </tr>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
@@ -169,7 +168,7 @@ const timestamps = computed(() => {
               >
                 Slot size
               </td>
-              <td class="px-6 py-2 font-light">{{ request.ask.slotSize }} bytes</td>
+              <td class="px-6 py-2 font-light">{{ requestDetails.ask.slotSize }} bytes</td>
             </tr>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
@@ -177,7 +176,7 @@ const timestamps = computed(() => {
               >
                 Proof probability
               </td>
-              <td class="px-6 py-2 font-light">{{ request.ask.proofProbability }}</td>
+              <td class="px-6 py-2 font-light">{{ requestDetails.ask.proofProbability }}</td>
             </tr>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
@@ -185,7 +184,7 @@ const timestamps = computed(() => {
               >
                 Reward
               </td>
-              <td class="px-6 py-2 font-light">{{ request.ask.reward }} CDX</td>
+              <td class="px-6 py-2 font-light">{{ requestDetails.ask.reward }} CDX</td>
             </tr>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td
@@ -193,7 +192,7 @@ const timestamps = computed(() => {
               >
                 Collateral
               </td>
-              <td class="px-6 py-2 font-light">{{ request.ask.collateral }} CDX</td>
+              <td class="px-6 py-2 font-light">{{ requestDetails.ask.collateral }} CDX</td>
             </tr>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 text-base">
               <td

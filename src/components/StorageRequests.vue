@@ -131,8 +131,7 @@ onMounted(() => {
       </div>
     </div>
     <div
-    class="relative overflow-x-auto overflow-y-hidden max-h-screen shadow-md
-    sm:rounded-lg border-t border-gray-50 h-full"
+      class="relative overflow-x-auto overflow-y-hidden max-h-screen shadow-md sm:rounded-lg border-t border-gray-50 h-full"
     >
       <table
         class="w-full relative text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 rounded-lg"
@@ -149,8 +148,10 @@ onMounted(() => {
         </thead>
         <tbody>
           <tr
-            v-for="([requestId, { requestedAt, moderated, state }], idx) in requestsOrdered"
-            :key="{ requestId }"
+            v-for="(
+              [requestId, { request, requestedAt, moderated, state }], idx
+            ) in requestsOrdered"
+            :key="requestId"
             class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 dark:bg-gray-800"
             @click="router.push({ path: `/request/${requestId}`, query: { enableModeration } })"
           >

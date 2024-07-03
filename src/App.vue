@@ -17,7 +17,7 @@ import { useEventsStore } from './stores/events'
 
 const eventsStore = useEventsStore()
 const requestsStore = useRequestsStore()
-const { loadingRecent, loadingRequestStates } = storeToRefs(requestsStore)
+const { loading } = storeToRefs(requestsStore)
 const { events } = storeToRefs(eventsStore)
 const codexApi = inject('codexApi')
 const ethProvider = inject('ethProvider')
@@ -27,8 +27,10 @@ window.name = generateUniqueId()
 onMounted(() => {
   initDrawers()
   initDismisses()
-  requestsStore.refetchRequestStates()
-  requestsStore.fetchPastRequests()
+  requestsStore.$hydrate()
+  requestsStore.refetchRequestStates().then(() => {
+    requestsStore.fetchPastRequests()
+  })
   eventsStore.listenForNewEvents()
 
   window.addEventListener('storage', handleStorageEvent)
@@ -111,11 +113,11 @@ onUnmounted(() => {
     </footer>
     <div id="toast-container" class="fixed bottom-5 right-5 flex flex-col space-y-2">
       <ToastNotification
-        v-if="loadingRecent"
+        v-if="loading.recent"
         text="Loading recent storage requests..."
       ></ToastNotification>
       <ToastNotification
-        v-if="loadingRequestStates"
+        v-if="loading.states"
         text="Loading latest request states..."
       ></ToastNotification>
     </div>

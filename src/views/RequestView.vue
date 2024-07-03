@@ -20,27 +20,27 @@ async function fetchRequest(requestId) {
       error.message.includes('Unknown request') ||
       error.message.includes('invalid BytesLike value')
     ) {
-      router.push({ path: '/404' })
+      router.push({ path: '/404', query: route.query })
     }
   }
 }
 
 const request = computed(() => requests.value[route.params.requestId])
-const detailsLoading = computed(() => requests.value[route.params.requestId]?.detailsLoading)
+const detailsLoading = computed(() => requests.value[route.params.requestId]?.loading?.request)
 
 watch(() => route.params.requestId, fetchRequest, { immediate: true })
 </script>
 
 <template>
   <div>
-    <SkeletonLoading v-if="loading || detailsLoading" type="image" />
+    <SkeletonLoading v-if="loading.past || detailsLoading" type="image" />
     <StorageRequest
       v-else-if="!!request"
       :requestId="route.params.requestId"
       v-model="request"
       :enableModeration="route.query.enableModeration === 'true'"
-      :slotsLoading="request.slotsLoading"
-      :slotsFetched="request.slotsFetched"
+      :slotsLoading="request.loading.slots"
+      :slotsFetched="request.fetched.slots"
     />
   </div>
 </template>

@@ -10,7 +10,7 @@ const { loading } = storeToRefs(requestsStore)
 
 <template>
   <div>
-    <SkeletonLoading v-if="loading" type="text" />
+    <SkeletonLoading v-if="loading.past" type="text" />
     <StorageRequests :enable-moderation="true" v-else />
   </div>
 </template>

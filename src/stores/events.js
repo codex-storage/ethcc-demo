@@ -37,7 +37,7 @@ export const useEventsStore = defineStore(
     async function listenForNewEvents() {
       async function onStorageRequested(requestId, ask, expiry, event) {
         let { blockNumber, blockHash } = event.log
-        const request = await requests.add(requestId, ask, expiry, blockHash)
+        const request = await requests.addFromEvent(requestId, ask, expiry, blockHash)
 
         add({
           event: StorageEvent.StorageRequested,

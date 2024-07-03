@@ -31,15 +31,104 @@ export const useRequestsStore = defineStore(
     const events = useEventsStore()
     let { StorageRequested } = marketplace.filters
     const requests = ref({}) // key: requestId, val: {request, state, slots: [{slotId, slotIdx, state}]}
-    const loading = ref(false)
-    const loadingRecent = ref(false)
-    const loadingRequestStates = ref(false)
-    const fetched = ref(false) // indicates if past events were fetched
     const blocks = ref({})
+    const loading = ref({
+      past: false,
+      recent: false,
+      states: false
+    })
+    const fetched = ref({
+      past: false
+    })
+    // Request structure
+    // {
+    //   request: {
+    //     client,
+    //     ask: {
+    //       slots,
+    //       slotSize,
+    //       duration,
+    //       proofProbability,
+    //       reward,
+    //       collateral,
+    //       maxSlotLoss
+    //     },
+    //     content: {
+    //       cid,
+    //       merkleRoot
+    //     },
+    //     expiry,
+    //     nonce,
+    //   },
+    //   state,
+    //   moderated: false,
+    //   requestedAt: Number (timestamp in seconds),
+    //   requestFinishedId: Number (setTimeout id for request completion update)
+    //   slots: [{slotId, slotIdx, state}],
+    //   loading: {
+    //     request: false,
+    //     slots: false,
+    //     state: false
+    //   },
+    //   fetched: {
+    //     request: false,
+    //     slots: false
+    //   }
+    // }
+
+    // fetch request details if not previously fetched
+    const getRequest = async (requestId) => {
+      try {
+        let request = requests.value[requestId]
+        if (exists(requestId) && request.fetched.request === true) {
+          console.log('request', requestId, ' details already fetched')
+          return request
+        }
+        requests.value[requestId] = {
+          loading: {
+            request: true,
+            slots: false,
+            state: false
+          },
+          fetched: {
+            request: false,
+            slots: false
+          }
+        }
+        request = arrayToObject(await marketplace.getRequest(requestId))
+        await getRequestState(requestId)
+        requests.value[requestId] = {
+          ...requests.value[requestId],
+          request,
+          moderated: 'pending'
+          // requestedAt: will be set in addFromEvent, as we don't have a block
+          // requestFinishedId: will be set in addFromEvent as we don't have
+          //   requestedAt yet
+          // state: state is set in getRequestState
+        }
+        requests.value[requestId].loading.request = false
+        requests.value[requestId].fetched.request = true
+        return requests.value[requestId]
+      } catch (e) {
+        delete requests.value[requestId]
+        throw new Error(`failed to get request for ${requestId}: ${e.message}`)
+      }
+    }
 
     const getRequestState = async (requestId) => {
-      let stateIdx = await marketplace.requestState(requestId)
-      return toRequestState(Number(stateIdx))
+      if (!exists(requestId)) {
+        throw new RequestNotFoundError(requestId, `Request not found`)
+      }
+      try {
+        requests.value[requestId].loading.state = true
+        const stateIdx = await marketplace.requestState(requestId)
+        const state = toRequestState(Number(stateIdx))
+        requests.value[requestId].state = state
+      } catch (e) {
+        throw new Error(`failed to get request state for ${requestId}: ${e.message}`)
+      } finally {
+        requests.value[requestId].loading.state = false
+      }
     }
 
     const getSlotState = async (slotId) => {
@@ -48,30 +137,42 @@ export const useRequestsStore = defineStore(
     }
 
     const getSlots = async (requestId, numSlots) => {
-      console.log(`fetching ${numSlots} slots`)
-      let start = Date.now()
-      let slots = []
-      for (let slotIdx = 0; slotIdx < numSlots; slotIdx++) {
-        try {
-          let id = slotId(requestId, slotIdx)
-          const startSlotState = Date.now()
-          let state = await getSlotState(id)
-          console.log(`fetched slot state in ${(Date.now() - startSlotState) / 1000}s`)
-          const startGetHost = Date.now()
-          let provider = await marketplace.getHost(id)
-          console.log(`fetched slot provider in ${(Date.now() - startGetHost) / 1000}s`)
-          slots.push({ slotId: id, slotIdx, state, provider })
-        } catch (e) {
-          console.error('error getting slot details', e)
-          continue
-        }
+      if (!exists(requestId)) {
+        throw new RequestNotFoundError(requestId, `Request not found`)
       }
-      console.log(`fetched ${numSlots} slots in ${(Date.now() - start) / 1000}s`)
-      return slots
+      requests.value[requestId].loading.slots = true
+      try {
+        console.log(`fetching ${numSlots} slots`)
+        let start = Date.now()
+        let slots = []
+        for (let slotIdx = 0; slotIdx < numSlots; slotIdx++) {
+          try {
+            let id = slotId(requestId, slotIdx)
+            const startSlotState = Date.now()
+            let state = await getSlotState(id)
+            console.log(`fetched slot state in ${(Date.now() - startSlotState) / 1000}s`)
+            const startGetHost = Date.now()
+            let provider = await marketplace.getHost(id)
+            console.log(`fetched slot provider in ${(Date.now() - startGetHost) / 1000}s`)
+            slots.push({ slotId: id, slotIdx, state, provider })
+          } catch (e) {
+            console.error('error getting slot details', e)
+            continue
+          }
+        }
+        console.log(`fetched ${numSlots} slots in ${(Date.now() - start) / 1000}s`)
+        requests.value[requestId].slots = slots
+        return slots
+      } catch (e) {
+        throw new Error(`error fetching slots for ${requestId}: ${e.message}`)
+      } finally {
+        requests.value[requestId].loading.slots = false
+        requests.value[requestId].fetched.slots = true
+      }
     }
 
     const getBlock = async (blockHash) => {
-      if (Object.keys(blocks.value).includes(blockHash)) {
+      if (blockHash in blocks.value) {
         return blocks.value[blockHash]
       } else {
         let { number, timestamp } = await ethProvider.getBlock(blockHash)
@@ -80,22 +181,20 @@ export const useRequestsStore = defineStore(
       }
     }
 
-    async function add(requestId, ask, expiry, blockHash) {
-      let state = await getRequestState(requestId)
+    const addFromEvent = async (requestId, ask, expiry, blockHash) => {
+      let request = await getRequest(requestId)
+      let { state } = request.request
       let { timestamp } = await getBlock(blockHash)
       let requestFinishedId = waitForRequestFinished(requestId, ask, expiry, state, timestamp)
-      let reqExisting = requests.value[requestId] || {} // just in case it already exists
 
-      let request = {
-        ...reqExisting,
-        state,
-        requestedAt: timestamp,
-        requestFinishedId,
-        detailsFetched: false,
-        moderated: 'pending'
-      }
-      requests.value[requestId] = request
+      requests.value[requestId].requestedAt = timestamp
+      requests.value[requestId].requestFinishedId = requestFinishedId
+
       return request
+    }
+
+    const exists = (requestId) => {
+      return requestId in requests.value
     }
 
     // Returns an array of Promises, where each Promise represents the fetching
@@ -112,7 +211,7 @@ export const useRequestsStore = defineStore(
         return events.map(async (event, i) => {
           let { requestId, ask, expiry } = event.args
           let { blockHash, blockNumber } = event
-          await add(requestId, ask, expiry, blockHash)
+          await addFromEvent(requestId, ask, expiry, blockHash)
         })
       } catch (error) {
         console.error(`failed to load past contract events: ${error.message}`)
@@ -122,7 +221,7 @@ export const useRequestsStore = defineStore(
 
     async function refetchRequestStates() {
       async function refetchRequestState(requestId) {
-        requests.value[requestId].state = await getRequestState(requestId)
+        await getRequestState(requestId)
         let { ask, expiry, state, requestedAt } = requests.value[requestId]
         // refetching of requests states happen on page load, so if we're
         // loading the page, we need to reset any timeouts for RequestFinished
@@ -137,7 +236,7 @@ export const useRequestsStore = defineStore(
       }
       // array of asynchronously-executed Promises, each requesting a request
       // state
-      loadingRequestStates.value = true
+      loading.value.states = true
       try {
         const fetches = Object.entries(requests.value).map(([requestId, request]) =>
           refetchRequestState(requestId)
@@ -146,7 +245,7 @@ export const useRequestsStore = defineStore(
       } catch (e) {
         console.error(`failure requesting latest request states:`, e)
       } finally {
-        loadingRequestStates.value = false
+        loading.value.states = false
       }
     }
 
@@ -158,52 +257,32 @@ export const useRequestsStore = defineStore(
       const lastBlockNumber = blocksSorted.length ? blocksSorted[0].number : null
 
       if (lastBlockNumber) {
-        loadingRecent.value = true
+        loading.value.recent = true
       } else {
-        loading.value = true
+        loading.value.past = true
       }
 
       await Promise.all(await fetchPastRequestsFrom(lastBlockNumber + 1))
 
       if (lastBlockNumber) {
-        loadingRecent.value = false
+        loading.value.recent = false
       } else {
-        loading.value = false
-        fetched.value = true
+        loading.value.past = false
+        fetched.value.past = true
       }
     }
 
     async function fetchRequestDetails(requestId) {
       try {
-        let request = requests.value[requestId] || {}
-        if (requestId in requests.value) {
-          requests.value[requestId].detailsLoading = true
-        }
         // fetch request details if not previously fetched
-        if (request?.detailsFetched !== true) {
-          console.log('request', requestId, ' details already fetched')
-          request = arrayToObject(await marketplace.getRequest(requestId))
-        }
+        const { request } = await getRequest(requestId)
+
         // always fetch state
-        const state = await getRequestState(requestId)
+        await getRequestState(requestId)
 
-        // always fetch slots
+        // always fetch slots - fire async but don't wait
         console.log('fetching slots for request', requestId)
-        getSlots(requestId, request.ask.slots).then((slots) => {
-          requests.value[requestId].slots = slots
-          requests.value[requestId].slotsLoading = false
-          requests.value[requestId].slotsFetched = true
-        })
-
-        // update state
-        requests.value[requestId] = {
-          ...requests.value[requestId], // state, requestedAt, requestFinishedId (null)
-          ...request,
-          state,
-          slotsLoading: true,
-          detailsFetched: true,
-          detailsLoading: false
-        }
+        getSlots(requestId, request.ask.slots)
       } catch (error) {
         if (
           !error.message.includes('Unknown request') &&
@@ -216,25 +295,21 @@ export const useRequestsStore = defineStore(
     }
 
     function updateRequestState(requestId, newState) {
-      if (!Object.keys(requests.value).includes(requestId)) {
+      if (!exists(requestId)) {
         throw new RequestNotFoundError(requestId, `Request not found`)
       }
-      let { state, ...rest } = requests.value[requestId]
-      state = newState
-      requests.value[requestId] = { state, ...rest }
+      requests.value[requestId].state = newState
     }
 
     function updateRequestFinishedId(requestId, newRequestFinishedId) {
-      if (!Object.keys(requests.value).includes(requestId)) {
+      if (!exists(requestId)) {
         throw new RequestNotFoundError(requestId, `Request not found`)
       }
-      let { requestFinishedId, ...rest } = requests.value[requestId]
-      requestFinishedId = newRequestFinishedId
-      requests.value[requestId] = { requestFinishedId, ...rest }
+      requests.value[requestId].state = newRequestFinishedId
     }
 
     function updateRequestSlotState(requestId, slotIdx, newState) {
-      if (!Object.keys(requests.value).includes(requestId)) {
+      if (!exists(requestId)) {
         throw new RequestNotFoundError(requestId, `Request not found`)
       }
       let { slots, ...rest } = requests.value[requestId]
@@ -248,7 +323,7 @@ export const useRequestsStore = defineStore(
     }
 
     function updateRequestSlotProvider(requestId, slotIdx, provider) {
-      if (!Object.keys(requests.value).includes(requestId)) {
+      if (!exists(requestId)) {
         throw new RequestNotFoundError(requestId, `Request not found`)
       }
       let { slots, ...rest } = requests.value[requestId]
@@ -274,8 +349,7 @@ export const useRequestsStore = defineStore(
         try {
           // the state may actually have been cancelled, but RequestCancelled
           // may not have fired yet, so get the updated state
-          const state = await getRequestState(requestId)
-          updateRequestState(requestId, state)
+          await getRequestState(requestId)
           updateRequestFinishedId(requestId, null)
         } catch (error) {
           if (error instanceof RequestNotFoundError) {
@@ -296,7 +370,7 @@ export const useRequestsStore = defineStore(
     }
 
     function cancelWaitForRequestFinished(requestId) {
-      if (!Object.keys(requests.value).includes(requestId)) {
+      if (!exists(requestId)) {
         throw new RequestNotFoundError(requestId, `Request not found`)
       }
       let { requestFinishedId } = requests.value[requestId]
@@ -308,7 +382,8 @@ export const useRequestsStore = defineStore(
     return {
       requests,
       blocks,
-      add,
+      addFromEvent,
+      exists,
       getBlock,
       fetchPastRequests,
       refetchRequestStates,
@@ -319,16 +394,14 @@ export const useRequestsStore = defineStore(
       updateRequestFinishedId,
       cancelWaitForRequestFinished,
       loading,
-      loadingRecent,
-      loadingRequestStates,
       fetched,
       RequestNotFoundError
     }
   },
   {
     persist: {
-      serializer,
-      paths: ['requests', 'blocks', 'fetched', 'loading', 'loadingRecent']
+      serializer
+      // paths: ['requests', 'blocks', 'fetched', 'loading']
     }
   }
 )

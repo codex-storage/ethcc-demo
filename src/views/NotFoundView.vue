@@ -7,7 +7,7 @@ import { computed } from 'vue'
 
 const requestsStore = useRequestsStore()
 const { loading, requests } = storeToRefs(requestsStore)
-const isLoading = computed(() => loading.value || !requests.value)
+const isLoading = computed(() => loading.value.past || !requests.value)
 </script>
 
 <template>
