@@ -222,7 +222,11 @@ export const useRequestsStore = defineStore(
     async function refetchRequestStates() {
       async function refetchRequestState(requestId) {
         await getRequestState(requestId)
-        let { ask, expiry, state, requestedAt } = requests.value[requestId]
+        let {
+          request: { ask, expiry },
+          state,
+          requestedAt
+        } = requests.value[requestId]
         // refetching of requests states happen on page load, so if we're
         // loading the page, we need to reset any timeouts for RequestFinished
         // events
