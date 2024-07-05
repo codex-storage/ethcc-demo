@@ -32,34 +32,6 @@ onMounted(() => {
     requestsStore.fetchPastRequests()
   })
   eventsStore.listenForNewEvents()
-
-  window.addEventListener('storage', handleStorageEvent)
-})
-
-const getLocalStorageKey = inject('getLocalStorageKey')
-const localStorageKey = getLocalStorageKey(requestsStore.$id)
-const localStorageMetaKey = `${localStorageKey}_storeEventMeta`
-function handleStorageEvent(event) {
-  if (event.key === localStorageKey) {
-    let serialized = window.localStorage.getItem(localStorageMetaKey)
-    if (serialized) {
-      let { source, timestamp } = serializer.deserialize(serialized)
-      // prevent our own window local storage updates from hydrating (infinite
-      // loop) and prevent stale updates from hydrating
-      if (source !== window.name && timestamp > lastStoreTimestamp) {
-        requestsStore.$hydrate()
-      }
-    }
-  }
-}
-let lastStoreTimestamp = 0
-requestsStore.$subscribe((_mutation, state) => {
-  lastStoreTimestamp = Date.now()
-  const storeEventMeta = {
-    source: window.name,
-    timestamp: Date.now()
-  }
-  window.localStorage.setItem(localStorageMetaKey, serializer.serialize(storeEventMeta))
 })
 
 async function detectRunningCodexNode() {
@@ -79,10 +51,6 @@ async function detectRunningCodexDevnet() {
     return false
   }
 }
-
-onUnmounted(() => {
-  window.removeEventListener('storage', handleStorageEvent)
-})
 </script>
 
 <template>

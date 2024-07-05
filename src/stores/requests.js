@@ -404,7 +404,8 @@ export const useRequestsStore = defineStore(
   },
   {
     persist: {
-      serializer
+      serializer,
+      crossTabSync: true
       // paths: ['requests', 'blocks', 'fetched', 'loading']
     }
   }

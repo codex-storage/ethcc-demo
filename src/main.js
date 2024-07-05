@@ -13,6 +13,7 @@ import marketplacePlugin from '@/plugins/MarketplacePlugin'
 import testTokenPlugin from '@/plugins/TestTokenPlugin'
 
 import './index.css'
+import { crossTabSync } from './plugins/pinia/crosstabsync'
 
 const app = createApp(App)
 
@@ -21,7 +22,7 @@ const pinia = createPinia()
 const getLocalStorageKey = (id) => `__persisted__${id}__${ENV.marketplaceAddress}`
 app.provide('getLocalStorageKey', getLocalStorageKey)
 pinia.use(
-  createPersistedState({
+  crossTabSync({
     key: getLocalStorageKey
   })
 )
