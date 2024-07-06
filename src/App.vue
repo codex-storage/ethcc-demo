@@ -59,7 +59,6 @@ async function detectRunningCodexDevnet() {
       <AppNav />
     </header>
     <main class="grow flex flex-col mx-auto max-w-screen-xl w-full p-4">
-      <ContractEventAlerts v-model="events"></ContractEventAlerts>
       <NavBreadcrumb class="mb-4"></NavBreadcrumb>
       <RouterView />
     </main>
