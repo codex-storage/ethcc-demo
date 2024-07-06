@@ -103,14 +103,14 @@ function hydrateStore(store, { storage, serializer, key, debug }) {
   }
 }
 const localStorageMetaKey = (key) => `${key}_storeEventMeta`
-let lastStoreTimestamp = 0
+let lastStoreTimestamp = {}
 function persistState(state, { storage, serializer, key, paths, debug }) {
   try {
     // const localStorageMetaKey = `${key}_storeEventMeta`
-    lastStoreTimestamp = Date.now()
+    lastStoreTimestamp[key] = Date.now()
     const storeEventMeta = {
       source: window.name,
-      timestamp: lastStoreTimestamp
+      timestamp: lastStoreTimestamp[key]
     }
     storage.setItem(localStorageMetaKey(key), serializer.serialize(storeEventMeta))
     const toStore = Array.isArray(paths) ? pick(state, paths) : state
@@ -126,7 +126,8 @@ function handleStorageEvent(event, store, key, serializer) {
       let { source, timestamp } = serializer.deserialize(serialized)
       // prevent our own window local storage updates from hydrating (infinite
       // loop) and prevent stale updates from hydrating
-      if (source !== window.name && timestamp > lastStoreTimestamp) {
+      const lateTimeStoreUpdated = lastStoreTimestamp[key] || 0
+      if (source !== window.name && timestamp > lateTimeStoreUpdated) {
         store.$hydrate()
       }
     }
@@ -184,7 +185,6 @@ function crossTabSync(factoryOptions = {}) {
         window.addEventListener('storage', (event) =>
           handleStorageEvent(event, store, key, serializer)
         )
-        store.$dispose
       }
     })
   }

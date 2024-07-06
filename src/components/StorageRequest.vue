@@ -14,7 +14,8 @@ import SkeletonLoading from './SkeletonLoading.vue'
 
 const router = useRouter()
 const request = defineModel()
-defineProps({
+const emit = defineEmits(['updateModerated'])
+const props = defineProps({
   requestId: {
     type: String,
     required: true
@@ -52,6 +53,9 @@ const timestamps = computed(() => {
   }
 })
 const requestDetails = computed(() => request.value.request)
+function updateEventModerated() {
+  emit('updateModerated', props.requestId, request.value.moderated)
+}
 </script>
 
 <template>
@@ -75,6 +79,7 @@ const requestDetails = computed(() => request.value.request)
               id="moderation"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               v-model="request.moderated"
+              @change="updateEventModerated"
             >
               <option v-for="(value, key) in moderatedState" :value="key" :key="key">
                 {{ value.text }}
