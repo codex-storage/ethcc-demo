@@ -139,7 +139,7 @@ onMounted(() => {
       </div>
     </div>
     <div
-      class="relative overflow-x-auto overflow-y-hidden max-h-screen shadow-md sm:rounded-lg border-t border-gray-50 h-full"
+      class="relative overflow-x-auto max-h-screen shadow-md sm:rounded-lg border-t border-gray-50 h-full"
     >
       <table
         class="w-full relative text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 rounded-lg"
