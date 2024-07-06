@@ -20,29 +20,49 @@ export const useEventsStore = defineStore(
       SlotFilled,
       SlotFreed
     } = marketplace.filters
-    const events = ref([]) // {event: 'SlotFreed',blockNumber,requestId,slotIdx,state: 'Free'}
+    const events = ref({}) // {event: 'SlotFreed',blockNumber,requestId,slotIdx,state: 'Free'}
+
+    const id = (event, blockNumber, requestId, slotIdx) => {
+      return `${event}_${blockNumber}_${requestId}_${slotIdx}`
+    }
 
     function add({ event, blockNumber, requestId, slotIdx, state, timestamp, moderated }) {
-      events.value.push({ event, blockNumber, requestId, slotIdx, state, timestamp, moderated })
+      let eventId = id(event, blockNumber, requestId, slotIdx)
+      events.value[eventId] = {
+        event,
+        blockNumber,
+        requestId,
+        slotIdx,
+        state,
+        timestamp,
+        moderated
+      }
     }
 
     function clearEvents() {
-      events.value = []
+      events.value = {}
     }
 
-    function clearEvent(idx) {
-      events.value = events.value.filter((_, index) => index !== idx)
+    function clearEvent(eventId) {
+      delete events.value[eventId]
+      // events.value = events.value.filter((_, index) => index !== idx)
     }
 
     function updateModerated(requestId, moderated) {
-      events.value = events.value.map((event) => {
-        if (event) {
-          if (event.requestId === requestId) {
-            event.moderated = moderated
-          }
-          return event
+      for ([eventId, { reqId }] in Object.entries(events.value)) {
+        if (reqId === requestId) {
+          events.value[eventId].moderated = moderated
+          break
         }
-      })
+      }
+      // events.value = events.value.map((event) => {
+      //   if (event) {
+      //     if (event.requestId === requestId) {
+      //       event.moderated = moderated
+      //     }
+      //     return event
+      //   }
+      // })
     }
 
     async function listenForNewEvents() {

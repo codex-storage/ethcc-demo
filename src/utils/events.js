@@ -1,10 +1,11 @@
 export const StorageEvent = {
-  StorageRequested: 'StorageRequested', // storage was requested
-  RequestFulfilled: 'RequestFulfilled', // request has started (all slots filled)
-  RequestCancelled: 'RequestCancelled', // request was cancelled when not all slots were filled by the expiry
-  RequestFailed: 'RequestFailed', // the request has failed (too many slots freed)
-  SlotFilled: 'SlotFilled', // slot was filled by provider (providing proof and collateral)
-  SlotFreed: 'SlotFreed' // slot freed after provider missed too many proofs
+  StorageRequested: 'Storage requested', // storage was requested
+  RequestFulfilled: 'Request fulfilled (started)', // request has started (all slots filled)
+  RequestCancelled: 'Request cancelled', // request was cancelled when not all slots were filled by the expiry
+  RequestFailed: 'Request failed', // the request has failed (too many slots freed)
+  SlotFilled: 'Slot filled', // slot was filled by provider (providing proof and collateral)
+  SlotFreed: 'Slot freed', // slot freed after provider missed too many proofs
+  RequestFinished: 'Request finished'
 }
 
 export function toSlotState(idx) {

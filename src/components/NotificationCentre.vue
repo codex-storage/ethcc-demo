@@ -45,6 +45,11 @@ const buttonClass = computed(() => {
     hover: showNotifCentre.value
   }
 })
+const eventsOrdered = computed(() => {
+  return Object.entries(events.value).sort(([eventIdA, eventA], [eventIdB, eventB]) => {
+    return eventB.timestamp - eventA.timestamp
+  })
+})
 </script>
 
 <template>
@@ -83,22 +88,25 @@ const buttonClass = computed(() => {
         </a>
       </div>
       <div class="overflow-y-auto">
-        <div v-if="events.length === 0" class="pt-6 pb-4 text-gray-900 dark:text-white">
+        <div
+          v-if="!events.value || Object.keys(events.value).length === 0"
+          class="pt-6 pb-4 text-gray-900 dark:text-white"
+        >
           No events
         </div>
         <div class="flow-root">
           <ul role="list" class="text-left divide-y divide-gray-200 dark:divide-gray-700">
             <li
               v-for="(
-                { event, blockNumber, requestId, slotIdx, state, timestamp, moderated }, idx
-              ) in events"
-              :key="idx"
-              class="py-3 pr-2 pl-4 pb-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                [eventId, { event, blockNumber, requestId, slotIdx, state, timestamp, moderated }],
+                idx
+              ) in eventsOrdered"
+              :key="eventId"
+              class="cursor-pointer py-3 pr-2 pl-4 pb-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
               @click="dismissAndRedirect(requestId)"
             >
               <div class="flex items-center">
                 <div class="flex-shrink-0">
-                  <!-- <span class="w-8 h-8 rounded-full" alt="Neil image" /> -->
                   <CodexImage
                     :cid="request(requestId).request.content.cid"
                     :moderated="moderated"
@@ -107,10 +115,10 @@ const buttonClass = computed(() => {
                   />
                 </div>
                 <div class="flex-1 min-w-0 ms-4">
-                  <p class="text-md font-semibold">
+                  <p class="text-md">
                     <ShortenValue :value="requestId"></ShortenValue>
                   </p>
-                  <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
+                  <p class="text-sm text-gray-900 truncate dark:text-white">
                     {{ event }}
                   </p>
                   <div
@@ -123,7 +131,7 @@ const buttonClass = computed(() => {
                 <div class="text-sm text-gray-500 truncate dark:text-gray-400">
                   <RelativeTime :timestamp="new Date(timestamp * 1000)"></RelativeTime>
                 </div>
-                <div class="pl-2 cursor-pointer" @click="emit('clearEvent', idx)">
+                <div class="pl-2 cursor-pointer" @click.stop="emit('clearEvent', eventId)">
                   <svg
                     class="w-5 h-5 text-gray-300 hover:text-gray-400 dark:text-gray-600 dark:hover:text-gray-400"
                     aria-hidden="true"
