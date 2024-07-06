@@ -4,6 +4,7 @@ import { slotId } from '../utils/ids'
 import { arrayToObject, toRequestState, timestampsFor } from '@/utils/requests'
 import { toSlotState } from '@/utils/slots'
 import { RequestState } from '@/utils/requests'
+import { StorageEvent } from '@/utils/events'
 import serializer from './serializer'
 import { useEventsStore } from './events'
 
@@ -364,11 +365,12 @@ export const useRequestsStore = defineStore(
         }
         let blockNumber = await ethProvider.getBlockNumber()
         events.add({
-          event: 'RequestFinished',
+          event: StorageEvent.RequestFinished,
           blockNumber,
           requestId,
           state: RequestState.Finished,
-          timestamp: Date.now() / 1000
+          timestamp: Date.now() / 1000,
+          moderated: requests.value[requestId]?.moderated
         })
       }, msFromNow + 1000) // add additional second to ensure state has changed
     }

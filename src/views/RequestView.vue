@@ -2,11 +2,13 @@
 import { computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRequestsStore } from '@/stores/requests'
+import { useEventsStore } from '@/stores/events'
 import { useRoute, useRouter } from 'vue-router'
 import StorageRequest from '@/components/StorageRequest.vue'
 import SkeletonLoading from '@/components/SkeletonLoading.vue'
 
 const requestsStore = useRequestsStore()
+const eventsStore = useEventsStore()
 const { requests, loading, fetched } = storeToRefs(requestsStore)
 const route = useRoute()
 const router = useRouter()
@@ -29,6 +31,10 @@ const request = computed(() => requests.value[route.params.requestId])
 const detailsLoading = computed(() => requests.value[route.params.requestId]?.loading?.request)
 
 watch(() => route.params.requestId, fetchRequest, { immediate: true })
+
+function updateModerated(requestId, moderated) {
+  eventsStore.updateModerated(requestId, moderated)
+}
 </script>
 
 <template>
@@ -41,6 +47,7 @@ watch(() => route.params.requestId, fetchRequest, { immediate: true })
       :enableModeration="route.query.enableModeration === 'true'"
       :slotsLoading="request.loading.slots"
       :slotsFetched="request.fetched.slots"
+      @updateModerated="updateModerated"
     />
   </div>
 </template>
