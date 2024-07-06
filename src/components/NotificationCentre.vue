@@ -88,13 +88,7 @@ const eventsOrdered = computed(() => {
         </a>
       </div>
       <div class="overflow-y-auto">
-        <div
-          v-if="!events.value || Object.keys(events.value).length === 0"
-          class="pt-6 pb-4 text-gray-900 dark:text-white"
-        >
-          No events
-        </div>
-        <div class="flow-root">
+        <div class="flow-root" v-if="eventsOrdered && Object.keys(eventsOrdered).length > 0">
           <ul role="list" class="text-left divide-y divide-gray-200 dark:divide-gray-700">
             <li
               v-for="(
@@ -152,6 +146,7 @@ const eventsOrdered = computed(() => {
             </li>
           </ul>
         </div>
+        <div class="pt-6 pb-4 text-gray-900 dark:text-white" v-else>No events</div>
       </div>
     </div>
   </div>

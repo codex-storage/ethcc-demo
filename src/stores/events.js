@@ -44,25 +44,19 @@ export const useEventsStore = defineStore(
     }
 
     function clearEvent(eventId) {
-      delete events.value[eventId]
-      // events.value = events.value.filter((_, index) => index !== idx)
+      events.value = Object.entries(events.value).map(([evtId, event]) => {
+        if (evtId != eventId) {
+          return event
+        }
+      })
     }
 
-    function updateModerated(requestId, moderated) {
-      for ([eventId, { reqId }] in Object.entries(events.value)) {
+    function updateModerated(reqId, moderated) {
+      Object.entries(events.value).forEach(([eventId, { requestId }]) => {
         if (reqId === requestId) {
           events.value[eventId].moderated = moderated
-          break
         }
-      }
-      // events.value = events.value.map((event) => {
-      //   if (event) {
-      //     if (event.requestId === requestId) {
-      //       event.moderated = moderated
-      //     }
-      //     return event
-      //   }
-      // })
+      })
     }
 
     async function listenForNewEvents() {
