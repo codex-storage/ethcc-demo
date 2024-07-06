@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { initTooltips } from 'flowbite'
 import { storeToRefs } from 'pinia'
@@ -7,6 +7,7 @@ import { useRequestsStore } from '@/stores/requests'
 import StateIndicator from '@/components/StateIndicator.vue'
 import RelativeTime from '@/components/RelativeTime.vue'
 import ShortenValue from '@/components/ShortenValue.vue'
+import CodexImage from '@/components/CodexImage.vue'
 import { getStateColour, moderatedState } from '@/utils/requests'
 
 const requestsStore = useRequestsStore()
@@ -18,6 +19,13 @@ const requestsOrdered = computed(() => {
   )
   return sorted
 })
+
+watch(
+  () => requests,
+  (reqs) => {
+    console.log('requests changed!')
+  }
+)
 
 defineProps({
   enableModeration: {
@@ -159,6 +167,12 @@ onMounted(() => {
               scope="row"
               class="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
             >
+              <CodexImage
+                :cid="request.content.cid"
+                :moderated="moderated"
+                class="w-10 h-10 rounded-full mt-1"
+                blurClass="blur"
+              />
               <div class="ps-3">
                 <div class="text-base font-semibold">
                   <ShortenValue :value="requestId"></ShortenValue>

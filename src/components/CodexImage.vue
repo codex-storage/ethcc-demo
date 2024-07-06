@@ -32,10 +32,24 @@ const props = defineProps({
     default() {
       return 120000
     }
+  },
+  blurClass: {
+    type: String,
+    default() {
+      return 'blur-xxl'
+    },
+    validator(value, props) {
+      return ['blur', 'blur-xxl'].includes(value)
+    }
   }
 })
 const hidden = computed(() => props.cid === undefined)
 const blurred = computed(() => ['pending', 'banned'].includes(props.moderated))
+const imageClassObj = computed(() => {
+  let obj = {}
+  obj[props.blurClass] = blurred.value
+  return obj
+})
 
 const controller = new AbortController()
 
@@ -120,7 +134,7 @@ onUnmounted(() => {
       :src="imgSrc"
       class="rounded-lg"
       :alt="props.alt"
-      :class="{ 'blur-xxl': blurred }"
+      :class="imageClassObj"
     />
   </div>
 </template>
