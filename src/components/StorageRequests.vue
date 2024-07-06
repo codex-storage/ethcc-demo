@@ -14,9 +14,9 @@ const requestsStore = useRequestsStore()
 const { requests } = storeToRefs(requestsStore)
 const router = useRouter()
 const requestsOrdered = computed(() => {
-  const sorted = Object.entries(requests.value).sort(
-    ([reqIdA, reqA], [reqIdB, reqB]) => reqB.requestedAt - reqA.requestedAt
-  )
+  const sorted = Object.entries(requests.value)
+    .sort(([reqIdA, reqA], [reqIdB, reqB]) => reqB.requestedAt - reqA.requestedAt)
+    .filter(([requestId, { fetched }]) => fetched.request)
   return sorted
 })
 
@@ -157,17 +157,25 @@ onMounted(() => {
         <tbody>
           <tr
             v-for="(
-              [requestId, { request, requestedAt, moderated, state }], idx
+              [requestId, { request, requestedAt, moderated, state, fetched }], idx
             ) in requestsOrdered"
             :key="requestId"
             class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 dark:bg-gray-800"
-            @click="router.push({ path: `/request/${requestId}`, query: { enableModeration } })"
+            @click="
+              router.push({
+                path: `/request/${requestId}`,
+                query: {
+                  enableModeration
+                }
+              })
+            "
           >
             <th
               scope="row"
               class="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
             >
               <CodexImage
+                v-if="fetched.request"
                 :cid="request.content.cid"
                 :moderated="moderated"
                 class="w-10 h-10 rounded-full mt-1"
@@ -178,7 +186,10 @@ onMounted(() => {
                   <ShortenValue :value="requestId"></ShortenValue>
                 </div>
                 <div class="font-normal text-gray-500">
-                  <RelativeTime :timestamp="new Date(requestedAt * 1000)"></RelativeTime>
+                  <RelativeTime
+                    v-if="requestedAt"
+                    :timestamp="new Date(requestedAt * 1000)"
+                  ></RelativeTime>
                 </div>
               </div>
             </th>
@@ -218,9 +229,3 @@ onMounted(() => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.max-h-128 {
-  max-height: 36rem;
-}
-</style>

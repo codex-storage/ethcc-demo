@@ -47,9 +47,9 @@ const timestamps = computed(() => {
   let { ask, expiry } = request.value.request
   let { endsAt, expiresAt } = timestampsFor(ask, expiry, requestedAt)
   return {
-    requested: new Date(requestedAt * 1000),
-    expires: new Date(expiresAt * 1000),
-    ends: new Date(endsAt * 1000)
+    requested: requestedAt ? new Date(requestedAt * 1000) : undefined,
+    expires: requestedAt ? new Date(expiresAt * 1000) : undefined,
+    ends: requestedAt ? new Date(endsAt * 1000) : undefined
   }
 })
 const requestDetails = computed(() => request.value.request)
@@ -116,15 +116,18 @@ function updateEventModerated() {
         <dd class="mb-4 flex justify-between font-light text-gray-500 sm:mb-5 dark:text-gray-400">
           <div>
             <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Requested</dt>
-            <RelativeTime :timestamp="timestamps.requested"></RelativeTime>
+            <RelativeTime
+              v-if="timestamps.requested"
+              :timestamp="timestamps.requested"
+            ></RelativeTime>
           </div>
           <div>
             <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Expires</dt>
-            <RelativeTime :timestamp="timestamps.expires"></RelativeTime>
+            <RelativeTime v-if="timestamps.expires" :timestamp="timestamps.expires"></RelativeTime>
           </div>
           <div>
             <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Ends</dt>
-            <RelativeTime :timestamp="timestamps.ends"></RelativeTime>
+            <RelativeTime v-if="timestamps.ends" :timestamp="timestamps.ends"></RelativeTime>
           </div>
         </dd>
       </dl>
@@ -222,7 +225,7 @@ function updateEventModerated() {
       </div>
 
       <SkeletonLoading v-if="slotsLoading" type="text" />
-      <Slots v-else :slots="request.slots"></Slots>
+      <Slots v-else-if="request.slots" :slots="request.slots"></Slots>
     </div>
   </div>
 </template>

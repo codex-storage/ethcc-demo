@@ -391,6 +391,7 @@ export const useRequestsStore = defineStore(
       addFromEvent,
       exists,
       getBlock,
+      getRequest,
       fetchPastRequests,
       refetchRequestStates,
       fetchRequestDetails,
