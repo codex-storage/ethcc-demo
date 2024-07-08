@@ -372,7 +372,7 @@ export const useRequestsStore = defineStore(
           timestamp: Date.now() / 1000,
           moderated: requests.value[requestId]?.moderated
         })
-      }, msFromNow + 1000) // add additional second to ensure state has changed
+      }, msFromNow + 10000) // add additional 10s to ensure state has changed
     }
 
     function cancelWaitForRequestFinished(requestId) {
