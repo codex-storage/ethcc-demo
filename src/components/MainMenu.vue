@@ -237,7 +237,7 @@ onUnmounted(() => {
         <li>
           <label class="inline-flex items-center cursor-pointer">
             <span class="me-3 text-sm font-light text-gray-900 dark:text-gray-300"
-              >Download thumbnails</span
+              >Disable thumbnails</span
             >
             <input
               id="thumbnail-toggle"
