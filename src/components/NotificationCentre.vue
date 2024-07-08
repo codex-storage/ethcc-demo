@@ -15,12 +15,12 @@ const router = useRouter()
 
 const events = defineModel()
 const emit = defineEmits(['clearEvents', 'clearEvent'])
+defineProps({
+  hideThumbnails: Boolean
+})
 function request(requestId) {
   return requests.value[requestId]
 }
-const eventsFiltered = computed(() => {
-  return Object.values(events.value).filter((event) => event !== null)
-})
 const showNotifCentre = ref(false)
 function toggleNotifCentre() {
   showNotifCentre.value = !showNotifCentre.value
@@ -54,20 +54,24 @@ const eventsOrdered = computed(() => {
 
 <template>
   <div class="relative">
-    <button @click.stop="toggleNotifCentre">
+    <button
+      @click.stop="toggleNotifCentre"
+      class="focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-600 rounded-lg"
+    >
       <svg
-        class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+        class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
         :class="buttonClass"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
         fill="currentColor"
-        viewBox="0 0 22 21"
+        viewBox="0 0 24 24"
       >
         <path
-          d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"
-        />
-        <path
-          d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"
+          fill-rule="evenodd"
+          d="M18.458 3.11A1 1 0 0 1 19 4v16a1 1 0 0 1-1.581.814L12 16.944V7.056l5.419-3.87a1 1 0 0 1 1.039-.076ZM22 12c0 1.48-.804 2.773-2 3.465v-6.93c1.196.692 2 1.984 2 3.465ZM10 8H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6V8Zm0 9H5v3a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-3Z"
+          clip-rule="evenodd"
         />
       </svg>
     </button>
@@ -100,8 +104,9 @@ const eventsOrdered = computed(() => {
               @click="dismissAndRedirect(requestId)"
             >
               <div class="flex items-center">
-                <div class="flex-shrink-0">
+                <div v-if="!hideThumbnails" class="flex-shrink-0">
                   <CodexImage
+                    v-if="request(requestId)?.request"
                     :cid="request(requestId).request.content.cid"
                     :moderated="moderated"
                     class="w-8 h-8 rounded-full mt-1"

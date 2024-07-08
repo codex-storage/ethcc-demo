@@ -31,7 +31,8 @@ defineProps({
   enableModeration: {
     type: Boolean,
     default: false
-  }
+  },
+  hideThumbnails: Boolean
 })
 
 onMounted(() => {
@@ -175,7 +176,7 @@ onMounted(() => {
               class="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
             >
               <CodexImage
-                v-if="fetched.request"
+                v-if="fetched.request && !hideThumbnails"
                 :cid="request.content.cid"
                 :moderated="moderated"
                 class="w-10 h-10 rounded-full mt-1"

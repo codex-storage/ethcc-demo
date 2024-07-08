@@ -51,16 +51,24 @@ async function detectRunningCodexDevnet() {
     return false
   }
 }
+const hideThumbnails = ref(false)
+function onToggleHideThumbnails(override) {
+  if (override !== undefined) {
+    hideThumbnails.value = override
+  } else {
+    hideThumbnails.value = !hideThumbnails.value
+  }
+}
 </script>
 
 <template>
   <div class="flex flex-col h-full min-w-96 bg-white dark:bg-gray-900">
     <header class="sticky top-0 z-10 w-full text-center border-b p-4 flex-none">
-      <AppNav />
+      <AppNav :hideThumbnails="hideThumbnails" @toggle-hide-thumbnails="onToggleHideThumbnails" />
     </header>
     <main class="grow flex flex-col mx-auto max-w-screen-xl w-full p-4">
       <NavBreadcrumb class="mb-4"></NavBreadcrumb>
-      <RouterView />
+      <RouterView :hideThumbnails="hideThumbnails" />
     </main>
     <footer class="w-full sticky bottom-0 border-t p-4 mt-4 flex-none flex justify-between">
       <div class="flex flex-col space-y-1">
