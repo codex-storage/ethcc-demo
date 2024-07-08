@@ -50,6 +50,7 @@ const eventsOrdered = computed(() => {
     return eventB.timestamp - eventA.timestamp
   })
 })
+const count = computed(() => eventsOrdered.value.length)
 </script>
 
 <template>
@@ -59,21 +60,28 @@ const eventsOrdered = computed(() => {
       class="focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-600 rounded-lg"
     >
       <svg
-        class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+        class="inline-flex items-center p-2 w-11 h-11 justify-center text-sm text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
         :class="buttonClass"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
         fill="currentColor"
-        viewBox="0 0 24 24"
+        viewBox="0 0 20 16"
       >
         <path
-          fill-rule="evenodd"
-          d="M18.458 3.11A1 1 0 0 1 19 4v16a1 1 0 0 1-1.581.814L12 16.944V7.056l5.419-3.87a1 1 0 0 1 1.039-.076ZM22 12c0 1.48-.804 2.773-2 3.465v-6.93c1.196.692 2 1.984 2 3.465ZM10 8H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6V8Zm0 9H5v3a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-3Z"
-          clip-rule="evenodd"
+          d="m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z"
+        />
+        <path
+          d="M11.241 9.817c-.36.275-.801.425-1.255.427-.428 0-.845-.138-1.187-.395L0 2.6V14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z"
         />
       </svg>
+
+      <span class="sr-only">Notifications</span>
+      <div
+        v-if="count > 0"
+        class="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-1 -end-1 dark:border-gray-900"
+      >
+        {{ count }}
+      </div>
     </button>
     <div
       v-if="showNotifCentre"

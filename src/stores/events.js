@@ -44,11 +44,10 @@ export const useEventsStore = defineStore(
     }
 
     function clearEvent(eventId) {
-      events.value = Object.entries(events.value).map(([evtId, event]) => {
-        if (evtId != eventId) {
-          return event
-        }
+      const filtered = Object.entries(events.value).filter(([evtId, event]) => {
+        return evtId != eventId
       })
+      events.value = Object.fromEntries(filtered)
     }
 
     function updateModerated(reqId, moderated) {
