@@ -28,6 +28,7 @@ const attrs = useAttrs()
           @clear-events="eventsStore.clearEvents"
           @clear-event="eventsStore.clearEvent"
           :hideThumbnails="attrs.hideThumbnails"
+          :enable-moderation="attrs.enableModeration"
         ></NotificationCentre>
         <MainMenu
           :hideThumbnails="attrs.hideThumbnails"

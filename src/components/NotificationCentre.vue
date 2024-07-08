@@ -16,7 +16,11 @@ const router = useRouter()
 const events = defineModel()
 const emit = defineEmits(['clearEvents', 'clearEvent'])
 defineProps({
-  hideThumbnails: Boolean
+  hideThumbnails: Boolean,
+  enableModeration: {
+    type: Boolean,
+    default: false
+  }
 })
 function request(requestId) {
   return requests.value[requestId]
@@ -116,7 +120,7 @@ const count = computed(() => eventsOrdered.value.length)
                   <CodexImage
                     v-if="request(requestId)?.request"
                     :cid="request(requestId).request.content.cid"
-                    :moderated="moderated"
+                    :moderated="enableModeration ? 'approved' : moderated"
                     class="w-8 h-8 rounded-full mt-1"
                     blurClass="blur"
                   />

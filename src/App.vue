@@ -1,7 +1,7 @@
 <script setup>
-import { onMounted, ref, onUnmounted, inject } from 'vue'
+import { onMounted, ref, computed, inject } from 'vue'
 import { useRequestsStore } from '@/stores/requests'
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
 import Balance from '@/components/Balance.vue'
 import BlockNumber from '@/components/BlockNumber.vue'
 import ToastNotification from '@/components/toasts/ToastNotification.vue'
@@ -21,6 +21,7 @@ const { loading } = storeToRefs(requestsStore)
 const { events } = storeToRefs(eventsStore)
 const codexApi = inject('codexApi')
 const ethProvider = inject('ethProvider')
+const route = useRoute()
 
 window.name = generateUniqueId()
 
@@ -59,12 +60,19 @@ function onToggleHideThumbnails(override) {
     hideThumbnails.value = !hideThumbnails.value
   }
 }
+const enableModeration = computed(() => {
+  return route.path.includes('moderate') || route.query.enableModeration === true
+})
 </script>
 
 <template>
   <div class="flex flex-col h-full min-w-96 bg-white dark:bg-gray-900">
     <header class="sticky top-0 z-10 w-full text-center border-b p-4 flex-none">
-      <AppNav :hideThumbnails="hideThumbnails" @toggle-hide-thumbnails="onToggleHideThumbnails" />
+      <AppNav
+        :hideThumbnails="hideThumbnails"
+        :enableModeration="enableModeration"
+        @toggle-hide-thumbnails="onToggleHideThumbnails"
+      />
     </header>
     <main class="grow flex flex-col mx-auto max-w-screen-xl w-full p-4">
       <NavBreadcrumb class="mb-4"></NavBreadcrumb>

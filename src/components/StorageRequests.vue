@@ -178,7 +178,7 @@ onMounted(() => {
               <CodexImage
                 v-if="fetched.request && !hideThumbnails"
                 :cid="request.content.cid"
-                :moderated="moderated"
+                :moderated="enableModeration ? 'approved' : moderated"
                 class="w-10 h-10 rounded-full mt-1"
                 blurClass="blur"
               />
