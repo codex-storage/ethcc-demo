@@ -192,3 +192,10 @@ yarn build
 ```sh
 yarn lint
 ```
+
+## Known issues
+1. [#1](https://github.com/codex-storage/ethcc-demo/issues/1) When running with two tabs open, for example when running Moderation in one
+   tab and the homepage in another tab, deleting events from the notification
+   centre *individually* does not sync properly across tabs. The deleted event
+   in one tab will not be deleted in the other tab. Clearing all events does
+   still work, however.
